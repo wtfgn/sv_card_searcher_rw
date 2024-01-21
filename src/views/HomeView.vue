@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col space-y-6 min-h-screen">
+  <div class="flex flex-col space-y-6">
     <div>
       <h1 class="text-4xl font-bold text-slate-800 dark:text-white">
         Welcome to Shadowverse Helper
