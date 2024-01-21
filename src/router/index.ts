@@ -7,17 +7,17 @@ const router = createRouter({
       path: '/',
       name: 'home',
       alias: '/home',
-      component: () => import('@/views/HomeView.vue'),
+      component: () => import('@/views/Home/HomeView.vue'),
     },
     {
       path: '/card_searcher',
       name: 'searcher',
-      component: () => import('@/views/CardSearcherView.vue'),
+      component: () => import('@/views/CardSearcher/CardSearcherView.vue'),
     },
     {
       path: '/deck_builder',
       name: 'builder',
-      component: () => import('@/views/DeckBuilderView.vue'),
+      component: () => import('@/views/DeckBuilder/DeckBuilderView.vue'),
     },
     {
       path: '/card/:id',
