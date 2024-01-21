@@ -36,5 +36,5 @@
 </template>
 
 <script setup lang="ts">
-import GradientColourBase from '@/components/HomePageView/GradientColourBase.vue';
+import GradientColourBase from '@/components/Styles/GradientColourBase.vue';
 </script>
