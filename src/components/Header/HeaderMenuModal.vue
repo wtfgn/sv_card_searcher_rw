@@ -1,7 +1,7 @@
 <template>
   <!-- Mobile Menu Modal -->
   <TransitionRoot appear :show="isOpen" as="template">
-    <Dialog as="div" class="relative z-10" @close="$emit('closeModal')">
+    <Dialog as="div" class="relative z-10 " @close="$emit('closeModal')">
       <TransitionChild
         as="template"
         enter="duration-300 ease-out"
@@ -11,12 +11,15 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/25" />
+        <div
+          class="fixed inset-0  backdrop-blur-sm"
+          :class="isDark ? 'bg-slate-900/80' : 'bg-black/20'"
+        />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
         <div
-          class="flex min-h-full items-center justify-center p-4 text-center"
+          class="min-h-full p-4 text-center "
         >
           <TransitionChild
             as="template"
@@ -28,29 +31,63 @@
             leave-to="opacity-0 scale-95"
           >
             <DialogPanel
-              class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+              class="fixed top-4 right-4 w-full max-w-xs transform overflow-hidden rounded-2xl p-6 text-left text-base font-semibold align-middle shadow-xl transition-all"
+              :class="isDark ? 'bg-slate-800 text-slate-400' : 'bg-white text-slate-900'"
             >
-              <DialogTitle
-                as="h3"
-                class="text-lg font-medium leading-6 text-gray-900"
+              <button
+                type="button" class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center"
+                :class="isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-600'"
+                @click="$emit('closeModal')"
               >
-                Payment successful
-              </DialogTitle>
-              <div class="mt-2">
-                <p class="text-sm text-gray-500">
-                  Your payment has been successfully submitted. We’ve sent you
-                  an email with all of the details of your order.
-                </p>
-              </div>
+                <svg viewBox="0 0 10 10" class="w-2.5 h-2.5 overflow-visible" aria-hidden="true"><path d="M0 0L10 10M10 0L0 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+              </button>
 
-              <div class="mt-4">
-                <button
-                  type="button"
-                  class="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                  @click="$emit('closeModal')"
-                >
-                  Got it, thanks!
-                </button>
+              <ul class="space-y-6">
+                <li>
+                  <RouterLink
+                    to="/card_searcher"
+                    :class="isDark ? 'hover:text-sky-400' : 'hover:text-sky-500'"
+                  >
+                    Card Searcher
+                  </RouterLink>
+                </li>
+
+                <li>
+                  <RouterLink
+                    to="/card_searcher"
+                    :class="isDark ? 'hover:text-sky-400' : 'hover:text-sky-500'"
+                  >
+                    Deck Builder
+                  </RouterLink>
+                </li>
+
+                <li>
+                  <a
+                    href="https://github.com/wtfgn/sv_helper"
+                    :class="isDark ? 'hover:text-sky-400' : 'hover:text-sky-500'"
+                  >
+                    Github
+                  </a>
+                </li>
+              </ul>
+
+              <!-- Theme Switch -->
+              <div
+                class="mt-6 pt-6 border-t"
+                :class="isDark ? 'border-slate-200/10' : 'border-slate-200'"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="">Theme</span>
+
+                  <button
+                    class="p-1 rounded-full"
+                    :class="isDark ? 'hover:bg-slate-50/[0.06]' : 'hover:bg-slate-900/10'"
+                    @click="switchTheme"
+                  >
+                    <SunIcon v-if="!isDark" class="w-8 h-8" />
+                    <MoonIcon v-else class="w-8 h-8" />
+                  </button>
+                </div>
               </div>
             </DialogPanel>
           </TransitionChild>
@@ -69,6 +106,9 @@ import {
   TransitionRoot,
 } from '@headlessui/vue';
 import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { MoonIcon, SunIcon } from '@heroicons/vue/24/solid';
+import { useUserStore } from '@/stores/user';
 
 defineProps({
   isOpen: {
@@ -78,4 +118,8 @@ defineProps({
 });
 
 defineEmits(['closeModal']);
+
+const userStore = useUserStore();
+const { switchTheme } = userStore;
+const { isDark } = storeToRefs(userStore);
 </script>

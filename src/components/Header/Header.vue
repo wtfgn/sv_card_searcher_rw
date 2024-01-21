@@ -1,5 +1,7 @@
 <template>
-  <div class="sticky top-0 w-full z-10 bg-white/75 dark:bg-slate-900/75 dark:text-gray-200 drop-shadow-md backdrop-blur border-b border-slate-900/10 dark:border-slate-50/[0.06]">
+  <header
+    class="sticky top-0 w-full z-10 bg-white/75 dark:bg-slate-900/75 dark:text-gray-200 drop-shadow-md backdrop-blur border-b border-slate-900/10 dark:border-slate-50/[0.06]"
+  >
     <div class="mx-auto max-w-9xl">
       <div class="flex items-center lg:px-8 lg:mx-0 py-4 mx-4">
         <!-- Logo -->
@@ -47,7 +49,7 @@
 
         <div class="hidden items-center ml-4 space-x-2 md:flex border-l border-slate-200 dark:border-slate-800 pl-3">
           <!-- Theme Switch -->
-          <button class="p-1 rounded-full hover:bg-slate-900/10 dark:hover:bg-slate-50/[0.06]" @click="$emit('toggleTheme', !isDark)">
+          <button class="p-1 rounded-full hover:bg-slate-900/10 dark:hover:bg-slate-50/[0.06]" @click="switchTheme">
             <SunIcon v-if="!isDark" class="w-8 h-8" />
             <MoonIcon v-else class="w-8 h-8" />
           </button>
@@ -58,28 +60,28 @@
         </div>
       </div>
     </div>
-  </div>
+  </header>
 
   <!-- Mobile Menu Modal -->
-  <HeaderMenuModal :is-open="isMobileMenuOpen" @close-modal="isMobileMenuOpen = false" />
+  <div class="md:hidden">
+    <HeaderMenuModal :is-open="isMobileMenuOpen" @close-modal="isMobileMenuOpen = false" />
+  </div>
 </template>
 
 <script setup lang="ts">
 import { EllipsisVerticalIcon, MoonIcon, SunIcon } from '@heroicons/vue/24/solid';
 import { computed, ref } from 'vue';
+import { storeToRefs } from 'pinia';
 import HeaderMenuModal from '@/components/Header/HeaderMenuModal.vue';
 import Logo from '@/components/Icons/Logo.vue';
 import HammerIcon from '@/components/Icons/HammerIcon.vue';
 import GtihubIcon from '@/components/Icons/GithubIcon.vue';
 import CardPickIcon from '@/components/Icons/CardPickIcon.vue';
+import { useUserStore } from '@/stores/user';
 
-defineProps<{
-  isDark: boolean
-}>();
-defineEmits<{
-  toggleTheme: [isDark: boolean]
-}>();
-
+const userStore = useUserStore();
+const { switchTheme } = userStore;
+const { isDark } = storeToRefs(userStore);
 const isMobileMenuOpen = ref(false);
 
 function openModal() {

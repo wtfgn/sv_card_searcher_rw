@@ -1,19 +1,20 @@
 <template>
-  <div :class="{ dark: isDark }" class="h-screen">
-    <!-- App -->
-    <div class="text-black bg-slate-100 dark:bg-slate-900 dark:text-gray-200 h-full">
-      <div class="flex flex-col h-full">
-        <!-- Header -->
-        <Header :is-dark="isDark" @toggle-theme="(newIsDark) => isDark = newIsDark" />
+  <div :class="{ dark: isDark }">
+    <div class="text-black dark:text-gray-200 bg-slate-100 dark:bg-slate-900">
+      <!-- App -->
+      <div class="min-h-full">
+        <div class="flex flex-col min-h-screen">
+          <!-- Header -->
+          <Header :is-dark="isDark" />
 
-        <!-- Main Section -->
-        <main class="mx-auto md:mx-10 p-4  h-full">
-          <RouterView />
-        </main>
+          <!-- Main Section -->
+          <!-- mx-auto md:mx-10 px-4 p-4 -->
+          <main class="flex-grow mx-auto md:mx-10 p-5">
+            <RouterView />
+          </main>
 
-        <!-- Footer -->
-        <div>
-          <Footer class="mt-10 py-8" />
+          <!-- Footer -->
+          <Footer class="mt-auto" />
         </div>
       </div>
     </div>
@@ -22,10 +23,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
 import Header from '@/components/Header/Header.vue';
 import Footer from '@/components/Footer.vue';
+import { useUserStore } from '@/stores/user';
 
-const isDark = ref(false);
+const userStore = useUserStore();
+const { isDark } = storeToRefs(userStore);
 </script>
 
 <style scoped>
