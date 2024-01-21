@@ -1,6 +1,6 @@
 <template>
   <header
-    class="sticky top-0 w-full z-10 bg-white/75 dark:bg-slate-900/75 dark:text-gray-200 drop-shadow-md backdrop-blur border-b border-slate-900/10 dark:border-slate-50/[0.06]"
+    class="sticky top-0 w-full z-10 bg-white/75 dark:bg-slate-900/75 dark:text-gray-200 drop-shadow-md backdrop-blur border-b border-slate-900/10 dark:border-slate-50/[0.06] transition-colors"
   >
     <div class="mx-auto max-w-9xl">
       <div class="flex items-center lg:px-8 lg:mx-0 py-4 mx-4">

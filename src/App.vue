@@ -1,6 +1,6 @@
 <template>
   <div :class="{ dark: isDark }">
-    <div class="text-black dark:text-gray-200 bg-slate-100 dark:bg-slate-900">
+    <div class="text-black dark:text-gray-200 bg-slate-100 dark:bg-slate-900 transition-colors">
       <!-- App -->
       <div class="min-h-full">
         <div class="flex flex-col min-h-screen">
