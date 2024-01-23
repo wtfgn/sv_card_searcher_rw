@@ -8,7 +8,7 @@
         <div class="flex items-center space-x-4 p-1">
           <RouterLink to="/" class="flex items-center">
             <span class="flex-shrink-0">
-              <Logo class="w-10 h-10 object-cover" />
+              <Logo class="w-10 h-10 object-cover hover:animate-bounce200" />
             </span>
             <span class="text-xl font-bold text-black dark:text-gray-200 ml-4">
               Shadowverse Helper
