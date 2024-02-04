@@ -1,8 +1,10 @@
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
+import type { LangaugeType } from '../types/user';
 
 export const useUserStore = defineStore('user', () => {
   const isDark = ref(false);
+  const language = ref<LangaugeType>('en');
 
   const switchTheme = () => {
     isDark.value = !isDark.value;
@@ -11,5 +13,6 @@ export const useUserStore = defineStore('user', () => {
   return {
     isDark,
     switchTheme,
+    language,
   };
 });

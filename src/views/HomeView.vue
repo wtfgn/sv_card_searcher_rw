@@ -13,7 +13,7 @@
       <HomeFeatureCard class="p-6">
         <template #title>
           Card Searcher
-          <CardPickIcon class="inline-block h-6 w-6 ml-2 text-white" />
+          <CardPickIcon class="inline-block h-6 w-6 ml-2" />
         </template>
         <template #description>
           Search for cards by name, type, or other attributes. Find the perfect cards for your deck.
@@ -28,7 +28,7 @@
       <HomeFeatureCard class="p-6">
         <template #title>
           Deck Builder
-          <HammerIcon class="inline-block h-6 w-6 ml-2 text-white" />
+          <HammerIcon class="inline-block h-6 w-6 ml-2" />
         </template>
         <template #description>
           Build your deck by adding cards from the card searcher. Save your deck to your account and share it with your friends.

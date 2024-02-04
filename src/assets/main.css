@@ -6,4 +6,29 @@
   .transition-switch-theme {
     @apply transition-colors duration-300 ease-in-out;
   }
+
+  .transition-float {
+    @apply transition hover:duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-[1.01]
+  }
+
+  .form-input-border {
+    @apply border border-slate-300 dark:border-slate-600
+  }
+
+  .form-input-outline {
+    @apply outline-none ring-2 ring-offset-2 ring-sky-500
+    dark:ring-sky-700 dark:ring-offset-sky-900
+  }
+
+  .form-input-bg {
+    @apply bg-white dark:bg-slate-700 dark:bg-opacity-50
+  }
+
+  .form-input-text-colour {
+    @apply dark:text-white text-gray-900
+  }
+
+  .form-input-padding {
+    @apply py-2 pl-3 pr-10
+  }
 }

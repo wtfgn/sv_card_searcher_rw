@@ -1,6 +1,6 @@
 <template>
   <div :class="{ dark: isDark }">
-    <div class="text-black dark:text-gray-200 bg-slate-100 dark:bg-slate-900 transition-colors">
+    <div class="font-mono text-black dark:text-gray-200 bg-slate-100 dark:bg-slate-900 transition-colors">
       <!-- App -->
       <div class="min-h-full">
         <div class="flex flex-col min-h-screen">
@@ -8,9 +8,30 @@
           <Header :is-dark="isDark" />
 
           <!-- Main Section -->
-          <!-- mx-auto md:mx-10 px-4 p-4 -->
-          <main class="flex-grow mx-auto md:mx-10 p-5">
-            <RouterView />
+          <main class="">
+            <RouterView v-slot="{ Component }">
+              <template v-if="Component">
+                <Transition
+                  mode="out-in" name="fade"
+                  enter-active-class="transition-opacity duration-300 ease-in-out"
+                  leave-active-class="transition-opacity duration-300 ease-in-out"
+                >
+                  <KeepAlive>
+                    <Suspense>
+                      <!-- Main Content -->
+                      <component :is="Component" />
+
+                      <!-- Fallback -->
+                      <template #fallback>
+                        <div class="flex justify-center items-center h-96">
+                          <Spinner />
+                        </div>
+                      </template>
+                    </Suspense>
+                  </KeepAlive>
+                </Transition>
+              </template>
+            </RouterView>
           </main>
 
           <!-- Footer -->
@@ -24,9 +45,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useFetch } from '@vueuse/core';
 import Header from '@/components/Header/Header.vue';
 import Footer from '@/components/Footer.vue';
 import { useUserStore } from '@/stores/user';
+import Spinner from '@/components/Icons/Spinner.vue';
 
 const userStore = useUserStore();
 const { isDark } = storeToRefs(userStore);
