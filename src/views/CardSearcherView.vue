@@ -7,7 +7,7 @@
     <div class="flex flex-col gap-4 md:flex-row md:items-start">
       <FilterPanel
         v-model:selectedProperties="filter"
-        class="md:sticky md:top-[6.5rem] w-full md:w-2/6 xl:w-1/4 p-6 overflow-y-auto h-[80vh]"
+        class="md:sticky md:top-[6.5rem] w-full md:w-2/6 xl:w-1/4 p-6 overflow-y-auto h-[80vh] mb-6"
       />
 
       <CardGallery
@@ -17,28 +17,36 @@
       >
         <template #heading>
           <h2
-            class="text-2xl dark:text-white font-semibold p-6
+            class="text-2xl dark:text-white font-semibold py-6 mx-4
           border-b border-slate-900/10 dark:border-slate-50/[0.06] transition-colors"
           >
             Cards
           </h2>
         </template>
 
-        <template #default />
+        <template #card="{ card }">
+          <div
+            class="hover:shadow-lg transition-shadow duration-300 ease-in-out w-fit rounded-lg
+          hover:transform hover:scale-105 justify-self-center"
+          >
+            <a :href="`https://shadowverse-portal.com/card/${card.card_id}?lang=${language}`">
+              <CardImage :card="card" class="m-1" />
+            </a>
+          </div>
+        </template>
       </CardGallery>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { watchDebounced } from '@vueuse/core';
 import FilterPanel from '@/components/FilterPanel/FilterPanel.vue';
 import CardGallery from '@/components/CardGallery/CardGallery.vue';
 import { useFetchCards } from '@/composables/useFetchCards';
-import type { Card, CardFilterProperty, CardProperty } from '@/types/card';
-import type { UseFetchCardsReturn } from '@/composables/useFetchCards';
+import type { CardFilterProperty, CardProperty } from '@/types/card';
+import CardImage from '@/components/CardGallery/CardImage.vue';
 import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore();
@@ -59,12 +67,5 @@ const filter = ref<CardFilterProperty>({
   resurgentProperty: {} as CardProperty,
 });
 
-const filteredCards = ref<Card[]>([]);
-const fetchError = ref<Error | null>(null);
-
-watchDebounced([filter, language], async () => {
-  const { cards, error } = await useFetchCards(filter);
-  filteredCards.value = cards.value;
-  fetchError.value = error.value;
-}, { debounce: 1000, maxWait: 2000, immediate: true, deep: true });
+const { cards: filteredCards, error: fetchError } = await useFetchCards(filter);
 </script>

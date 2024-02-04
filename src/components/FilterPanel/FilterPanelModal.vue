@@ -19,7 +19,7 @@
 
       <div class="fixed inset-0 overflow-y-auto">
         <div
-          class="min-h-full p-4 text-center "
+          class="flex min-h-full items-center justify-center p-4 text-center "
         >
           <TransitionChild
             as="template"
@@ -31,7 +31,8 @@
             leave-to="opacity-0 scale-95"
           >
             <DialogPanel
-              class="fixed top-4 right-4 w-full max-w-xs transform overflow-hidden rounded-2xl p-6 text-left text-base font-semibold align-middle shadow-xl transition-all"
+              class="w-full rounded-2xl p-6 max-w-xl transform overflow-hidden text-left text-base font-semibold shadow-xl align-middle transition-all
+              "
               :class="isDark ? 'bg-slate-800 text-slate-400' : 'bg-white text-slate-900'"
             >
               <button
@@ -42,53 +43,12 @@
                 <svg viewBox="0 0 10 10" class="w-2.5 h-2.5 overflow-visible" aria-hidden="true"><path d="M0 0L10 10M10 0L0 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
               </button>
 
-              <ul class="space-y-6">
-                <li>
-                  <RouterLink
-                    to="/card_searcher"
-                    :class="isDark ? 'hover:text-sky-400' : 'hover:text-sky-500'"
-                  >
-                    Card Searcher
-                  </RouterLink>
-                </li>
-
-                <li>
-                  <RouterLink
-                    to="/deck_builder"
-                    :class="isDark ? 'hover:text-sky-400' : 'hover:text-sky-500'"
-                  >
-                    Deck Builder
-                  </RouterLink>
-                </li>
-
-                <li>
-                  <a
-                    href="https://github.com/wtfgn/sv_helper"
-                    :class="isDark ? 'hover:text-sky-400' : 'hover:text-sky-500'"
-                  >
-                    Github
-                  </a>
-                </li>
-              </ul>
-
-              <!-- Theme Switch -->
-              <div
-                class="mt-6 pt-6 border-t"
-                :class="isDark ? 'border-slate-200/10' : 'border-slate-200'"
-              >
-                <div class="flex items-center justify-between">
-                  <span class="">Theme</span>
-
-                  <button
-                    class="p-1 rounded-full"
-                    :class="isDark ? 'hover:bg-slate-50/[0.06]' : 'hover:bg-slate-900/10'"
-                    @click="switchTheme"
-                  >
-                    <SunIcon v-if="!isDark" class="w-8 h-8" />
-                    <MoonIcon v-else class="w-8 h-8" />
-                  </button>
-                </div>
-              </div>
+              <FilterPanel
+                v-model:selectedProperties="selectedProperties"
+                :disabled-properties="disabledProperties"
+                class="shadow-none p-6 border-none"
+                :horizontal="true"
+              />
             </DialogPanel>
           </TransitionChild>
         </div>
@@ -107,19 +67,28 @@ import {
 } from '@headlessui/vue';
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { MoonIcon, SunIcon } from '@heroicons/vue/24/solid';
+import type { PropType } from 'vue';
+import FilterPanel from './FilterPanel.vue';
 import { useUserStore } from '@/stores/user';
+import type { CardFilterProperty } from '@/types/card';
 
 defineProps({
   isOpen: {
     type: Boolean,
     required: true,
   },
+  disabledProperties: {
+    type: Object as PropType<CardFilterProperty>,
+  },
 });
 
 defineEmits(['closeModal']);
 
 const userStore = useUserStore();
-const { switchTheme } = userStore;
 const { isDark } = storeToRefs(userStore);
+
+const selectedProperties = defineModel<CardFilterProperty>('selectedProperties', {
+  type: Object as PropType<CardFilterProperty>,
+  required: true,
+});
 </script>

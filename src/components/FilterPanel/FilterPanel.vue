@@ -1,133 +1,141 @@
 <template>
   <ContainerTemplate>
     <template #heading>
-      <h2 class="text-2xl mb-4 dark:text-white font-semibold">
+      <h2
+        class="text-2xl mb-6 dark:text-white font-semibold
+      border-b border-slate-900/10 dark:border-slate-50/[0.06] transition-colors"
+      >
         Filters
       </h2>
     </template>
 
     <template #default>
-      <div class="grid grid-cols-2 gap-4">
-        <!-- Search -->
-        <FilterPanelInput
-          v-model="selectedProperties.cardName"
-          class="w-full p-2 rounded text-lg col-span-full"
-          placeholder="Search for a card"
-          type="text"
-        />
+      <slot name="default">
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Search -->
+          <FilterPanelInput
+            v-model="selectedProperties.cardName"
+            class="w-full p-2 rounded text-lg col-span-full"
+            placeholder="Search for a card"
+            type="text"
+          />
 
-        <!-- Clan -->
-        <FilterPanelListBox
-          v-model="selectedProperties.clans"
-          class="w-full rounded text-lg col-span-full"
-          :options="[...clans]"
-          label="Clan"
-          multiple
-        />
+          <!-- Clan -->
+          <FilterPanelListBox
+            v-model="selectedProperties.clans"
+            class="w-full rounded text-lg col-span-full"
+            :options="[...clans].filter((clan) => !disabledProperties?.clans?.includes(clan))"
+            label="Clan"
+            multiple
+          />
 
-        <!-- Card Set -->
-        <FilterPanelListBox
-          v-model="selectedProperties.cardSets"
-          class="w-full rounded text-lg col-span-full"
-          :options="[...cardSets]"
-          label="Card Set"
-          multiple
-        />
+          <!-- Card Set -->
+          <FilterPanelListBox
+            v-if="!(disabledProperties?.cardSets?.length ?? 0 <= cardSets.length)"
+            v-model="selectedProperties.cardSets"
+            class="w-full rounded text-lg col-span-full"
+            :options="[...cardSets]"
+            label="Card Set"
+            multiple
+          />
 
-        <!-- Format -->
-        <FilterPanelRadioGroup
-          v-model="selectedProperties.format"
-          class="w-full rounded text-lg col-span-full"
-          :options="[...formats]"
-          label="Format"
-          options-container-class="flex flex-row gap-4 justify-evenly"
-        />
+          <!-- Format -->
+          <FilterPanelRadioGroup
+            v-model="selectedProperties.format"
+            class="w-full rounded text-lg col-span-full"
+            :options="[...formats]"
+            label="Format"
+            options-container-class="flex flex-row gap-4 justify-evenly"
+          />
 
-        <!-- Character Type -->
-        <FilterPanelListBox
-          v-model="selectedProperties.charTypes"
-          class="w-full rounded text-lg col-span-full"
-          :options="[...charTypes]"
-          label="Character Type"
-          multiple
-        />
+          <!-- Character Type -->
+          <FilterPanelListBox
+            v-model="selectedProperties.charTypes"
+            class="w-full rounded text-lg col-span-full"
+            :options="[...charTypes]"
+            label="Character Type"
+            multiple
+          />
 
-        <!-- Rarity -->
-        <FilterPanelListBox
-          v-model="selectedProperties.rarities"
-          class="w-full rounded text-lg col-span-full"
-          :options="[...rarities]"
-          label="Rarity"
-          multiple
-        />
+          <!-- Rarity -->
+          <FilterPanelListBox
+            v-model="selectedProperties.rarities"
+            class="w-full rounded text-lg col-span-full"
+            :options="[...rarities]"
+            label="Rarity"
+            multiple
+          />
 
-        <!-- Cost -->
-        <FilterPanelListBox
-          v-model="selectedProperties.costs"
-          class="w-full rounded text-lg col-span-full"
-          :options="[...costs]"
-          label="Cost"
-          multiple
-        />
+          <!-- Cost -->
+          <FilterPanelListBox
+            v-model="selectedProperties.costs"
+            class="w-full rounded text-lg col-span-full"
+            :options="[...costs]"
+            label="Cost"
+            multiple
+          />
 
-        <!-- Attack -->
-        <FilterPanelListBox
-          v-model="selectedProperties.atks"
-          class="w-full rounded text-lg"
-          :options="[...atks]"
-          label="Attack"
-          multiple
-        />
+          <!-- Attack -->
+          <FilterPanelListBox
+            v-model="selectedProperties.atks"
+            class="w-full rounded text-lg"
+            :options="[...atks]"
+            label="Attack"
+            multiple
+          />
 
-        <!-- Life -->
-        <FilterPanelListBox
-          v-model="selectedProperties.lifes"
-          class="w-full rounded text-lg"
-          :options="[...lifes]"
-          label="Life"
-          multiple
-        />
+          <!-- Life -->
+          <FilterPanelListBox
+            v-model="selectedProperties.lifes"
+            class="w-full rounded text-lg"
+            :options="[...lifes]"
+            label="Life"
+            multiple
+          />
 
-        <!-- Tribe Name -->
-        <FilterPanelListBox
-          v-model="selectedProperties.tribeNames"
-          class="w-full rounded text-lg"
-          :options="[...tribeNames]"
-          label="Tribe Name"
-          multiple
-        />
+          <!-- Tribe Name -->
+          <FilterPanelListBox
+            v-model="selectedProperties.tribeNames"
+            class="w-full rounded text-lg"
+            :options="[...tribeNames]"
+            label="Tribe Name"
+            multiple
+          />
 
-        <!-- Restricted Count -->
-        <FilterPanelListBox
-          v-model="selectedProperties.restrictedCounts"
-          class="w-full rounded text-lg"
-          :options="[...restrictedCounts]"
-          label="Restricted Count"
-          multiple
-        />
+          <!-- Restricted Count -->
+          <FilterPanelListBox
+            v-model="selectedProperties.restrictedCounts"
+            class="w-full rounded text-lg"
+            :options="[...restrictedCounts]"
+            label="Restricted Count"
+            multiple
+          />
 
-        <!-- Resurgent -->
-        <FilterPanelRadioGroup
-          v-model="selectedProperties.resurgentProperty"
-          class="w-full rounded text-lg col-span-full"
-          :options="[...resurgentProperties]"
-          label="Is Resurgent?"
-          options-container-class="flex flex-row gap-4 justify-evenly"
-        />
+          <!-- Resurgent -->
+          <FilterPanelRadioGroup
+            v-model="selectedProperties.resurgentProperty"
+            class="w-full rounded text-lg col-span-full"
+            :options="[...resurgentProperties]"
+            label="Is Resurgent?"
+            options-container-class="flex flex-row gap-4 justify-evenly"
+          />
 
-      <!-- Add more filters as needed -->
-      </div>
+          <!-- Add more filters as needed -->
+        </div>
+      </slot>
 
       <!-- Button Bar -->
-      <div class="flex justify-end mt-6">
-        <button
-          class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300
-        px-4 py-2 rounded ml-4 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-          @click="clearFilters"
-        >
-          Clear
-        </button>
-      </div>
+      <slot name="button-bar">
+        <div class="flex justify-end mt-6">
+          <button
+            class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300
+          px-4 py-2 rounded ml-4 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            @click="clearFilters"
+          >
+            Clear
+          </button>
+        </div>
+      </slot>
     </template>
   </ContainerTemplate>
 </template>
@@ -150,6 +158,12 @@ import { useCardProperties } from '@/composables/useCardProperties';
 import { useFetchCards } from '@/composables/useFetchCards';
 import ContainerTemplate from '@/components/Template/ContainerTemplate.vue';
 import type { UseFetchCardsReturn } from '@/composables/useFetchCards';
+
+defineProps({
+  disabledProperties: {
+    type: Object as PropType<CardFilterProperty>,
+  },
+});
 
 const userStore = useUserStore();
 const { language } = storeToRefs(userStore);
@@ -189,9 +203,4 @@ function clearFilters() {
     resurgentProperty: {} as CardProperty,
   };
 }
-
-// watchDebounced([selectedProperties, language], async () => {
-//   const res = await useFetchCards(selectedProperties);
-//   fetchResponse.value = res;
-// }, { debounce: 1000, maxWait: 2000, immediate: true, deep: true });
 </script>
