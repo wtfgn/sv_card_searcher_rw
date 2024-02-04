@@ -437,18 +437,18 @@ export const rarityData = {
 
 export const formatData = {
   'en': [
-    { id: 0, name: 'Rotation' },
-    { id: 1, name: 'Unlimited' },
+    { id: 0, name: 'Unlimited' },
+    { id: 1, name: 'Rotation' },
   ],
 
   'zh-tw': [
-    { id: 0, name: '指定系列' },
-    { id: 1, name: '無限制' },
+    { id: 0, name: '無限制' },
+    { id: 1, name: '指定' },
   ],
 
   'ja': [
-    { id: 0, name: 'ローテーション' },
-    { id: 1, name: 'アンリミテッド' },
+    { id: 0, name: 'アンリミテッド' },
+    { id: 1, name: 'ローテーション' },
   ],
 };
 

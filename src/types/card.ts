@@ -49,3 +49,5 @@ export interface Card {
   restricted_count_co_sub: number
   resurgent_card: number
 }
+
+export type CardInDeck = Card & { count: number };
