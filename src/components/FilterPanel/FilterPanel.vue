@@ -31,7 +31,6 @@
 
           <!-- Card Set -->
           <FilterPanelListBox
-            v-if="!(disabledProperties?.cardSets?.length ?? 0 <= cardSets.length)"
             v-model="selectedProperties.cardSets"
             class="w-full rounded text-lg col-span-full"
             :options="[...cardSets]"

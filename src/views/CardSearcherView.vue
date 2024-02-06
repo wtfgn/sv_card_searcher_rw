@@ -42,15 +42,19 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
+import { watchDebounced } from '@vueuse/core';
 import FilterPanel from '@/components/FilterPanel/FilterPanel.vue';
 import CardGallery from '@/components/CardGallery/CardGallery.vue';
 import { useFetchCards } from '@/composables/useFetchCards';
-import type { CardFilterProperty, CardProperty } from '@/types/card';
+import type { Card, CardFilterProperty, CardProperty } from '@/types/card';
 import CardImage from '@/components/CardGallery/CardImage.vue';
 import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore();
 const { language } = storeToRefs(userStore);
+
+const filteredCards = ref<Card[] | null>(null);
+const fetchError = ref<Error | null>(null);
 
 const filter = ref<CardFilterProperty>({
   cardName: '',
@@ -67,5 +71,18 @@ const filter = ref<CardFilterProperty>({
   resurgentProperty: {} as CardProperty,
 });
 
-const { cards: filteredCards, error: fetchError } = await useFetchCards(filter);
+watchDebounced([filter, language], async () => {
+  // Reset the state
+  filteredCards.value = null;
+  fetchError.value = null;
+
+  const { cards, error } = await useFetchCards(filter);
+  filteredCards.value = cards.value;
+  fetchError.value = error.value;
+}, {
+  debounce: 500,
+  immediate: true,
+  deep: true,
+  maxWait: 2000,
+});
 </script>
