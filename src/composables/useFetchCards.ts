@@ -19,28 +19,21 @@ export async function useFetchCards(filter: CardFilterProperty | (() => CardFilt
   const cards = ref<Card[] | null>(null);
   const error = ref<Error | null>(null);
 
-  watchDebounced([filter, language], async () => {
-    try {
-      cards.value = null;
-      error.value = null;
+  try {
+    cards.value = null;
+    error.value = null;
 
-      const res = await axios.get(`${baseUrl}/cards`, {
-        params: {
-          ...useParseFilter(toValue(filter)),
-          lang: userStore.language,
-        },
-      });
-      cards.value = res.data;
-    }
-    catch (err) {
-      error.value = err as Error;
-    }
-  }, {
-    debounce: 1000,
-    maxWait: 2000,
-    immediate: true,
-    deep: true,
-  });
+    const res = await axios.get(`${baseUrl}/cards`, {
+      params: {
+        ...useParseFilter(toValue(filter)),
+        lang: language.value,
+      },
+    });
+    cards.value = res.data;
+  }
+  catch (err) {
+    error.value = err as Error;
+  }
 
   return { cards, error };
 }

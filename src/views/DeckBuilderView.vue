@@ -78,32 +78,42 @@
         </template>
       </CardGallery>
 
-      <DeckBuilder class="w-full" :deck="builtDeck">
-        <template #default="{ cardsToDisplay }">
-          <div
-            class="flex gap-4
-            overflow-x-scroll overflow-y-hidden mx-6 mb-10 py-4
+      <ContainerTemplate class="w-full">
+        <template #heading>
+          <h2
+            class="text-2xl dark:text-white font-semibold py-6 mx-4
             border-b border-slate-900/10 dark:border-slate-50/[0.06] transition-colors"
           >
-            <div
-              v-for="card in cardsToDisplay"
-              :key="card.card_id"
-              class="relative shrink-0 hover:shadow-lg transition-shadow duration-300 ease-in-out w-fit rounded-lg
-              hover:transform hover:scale-105 justify-self-center cursor-pointer"
-              @click="removeFromDeck(card)"
-            >
-              <!-- Red layer -->
-              <div v-if="!isValidCard(card)" class="absolute inset-0 bg-red-500 bg-opacity-50 rounded-lg" />
-
-              <CardImage :card="card" class="m-1" />
-              <p class="text-center dark:text-white">
-                × {{ card.count }}
-              </p>
-            </div>
-            {{ deckUrl }}
-          </div>
+            Deck
+            <span class="border-l pl-4 border-slate-900/10 dark:border-slate-50/[0.06] transition-colors">
+              {{ totalCardCountInDeck }} / 40
+            </span>
+          </h2>
         </template>
-      </DeckBuilder>
+
+        <div
+          class="flex gap-4
+            overflow-x-scroll overflow-y-hidden mx-6 mb-10 py-4
+            border-b border-slate-900/10 dark:border-slate-50/[0.06] transition-colors"
+        >
+          <div
+            v-for="card in builtDeck"
+            :key="card.card_id"
+            class="relative shrink-0 hover:shadow-lg transition-shadow duration-300 ease-in-out w-fit rounded-lg
+              hover:transform hover:scale-105 justify-self-center cursor-pointer"
+            @click="removeFromDeck(card)"
+          >
+            <!-- Red layer -->
+            <div v-if="!isValidCard(card)" class="absolute inset-0 bg-red-500 bg-opacity-50 rounded-lg" />
+
+            <CardImage :card="card" class="m-1" />
+            <p class="text-center dark:text-white">
+              × {{ card.count }}
+            </p>
+          </div>
+          {{ deckUrl }}
+        </div>
+      </ContainerTemplate>
     </div>
 
     <!-- Only one root element is allowed here -->
@@ -122,6 +132,7 @@
 import { computed, ref, watch } from 'vue';
 import { AdjustmentsHorizontalIcon } from '@heroicons/vue/24/solid';
 import { storeToRefs } from 'pinia';
+import { watchDebounced } from '@vueuse/core';
 import FilterPanel from '@/components/FilterPanel/FilterPanel.vue';
 import CardGallery from '@/components/CardGallery/CardGallery.vue';
 import DeckBuilder from '@/components/DeckBuilder/DeckBuilder.vue';
@@ -132,6 +143,8 @@ import FilterPanelModal from '@/components/FilterPanel/FilterPanelModal.vue';
 import { useUserStore } from '@/stores/user';
 import { cardSetsData, clansData } from '@/config/card_properties';
 import { useCardProperties } from '@/composables/useCardProperties';
+import { useCheckCardProperties } from '@/composables/useCheckCardProperties';
+import ContainerTemplate from '@/components/Template/ContainerTemplate.vue';
 
 // const userStore = useUserStore();
 // const { language } = storeToRefs(userStore);
@@ -153,11 +166,13 @@ const filter = ref<CardFilterProperty>({
 });
 
 const userStore = useUserStore();
-const { cards: filteredCards, error: fetchError } = await useFetchCards(filter);
 const { language } = storeToRefs(userStore);
 const clans = clansData[language.value];
-const cardSets = cardSetsData[language.value];
+const { isToken } = useCheckCardProperties();
 const portalUrl = 'https://shadowverse-portal.com/deck/';
+
+const filteredCards = ref<Card[] | null>(null);
+const fetchError = ref<Error | null>(null);
 
 const cardsContainerEle = ref<HTMLElement | null>(null);
 const isFilterPanelModalOpen = ref(false);
@@ -168,11 +183,10 @@ const disabledProperties = computed(() => {
   // Disable other clans when a clan is selected, except for neutral
   if (selectedClan.value)
     disabledProperties.clans = clans.filter(clan => clan.id !== selectedClan.value?.id && clan.id !== 0);
-
-  disabledProperties.cardSets = [...cardSets];
-
   return disabledProperties;
 });
+const totalCardCountInDeck = computed(() => builtDeck.value.reduce((acc, c) => acc + c.count, 0));
+
 function isValidCard(card: Card) {
   if (card.format_type === 0)
     return card.format_type === filter.value.format?.id;
@@ -186,18 +200,18 @@ function toggleFilterPanel() {
 function addCardToDeck(card: Card) {
   const cardInDeck = builtDeck.value.find(c => c.card_id === card.card_id);
   // Sum all count if they have the same base_card_id
-  const totalCardCount = builtDeck.value.filter(c => c.base_card_id === card.base_card_id).reduce((acc, c) => acc + c.count, 0);
-  const totalDeckCount = builtDeck.value.reduce((acc, c) => acc + c.count, 0);
+  const totalCardCountByCard = builtDeck.value.filter(c => c.base_card_id === card.base_card_id).reduce((acc, c) => acc + c.count, 0);
+  const totalCardCountInDeck = builtDeck.value.reduce((acc, c) => acc + c.count, 0);
 
-  if (totalDeckCount >= 40)
+  if (totalCardCountInDeck >= 40)
     return;
 
   if (cardInDeck) {
-    if (totalCardCount < cardInDeck.restricted_count)
+    if (totalCardCountByCard < cardInDeck.restricted_count)
       cardInDeck.count += 1;
   }
   else {
-    if (totalCardCount < card.restricted_count)
+    if (totalCardCountByCard < card.restricted_count)
       builtDeck.value.push({ ...card, count: 1 });
   }
 }
@@ -238,7 +252,24 @@ const deckUrl = computed(() => portalUrl + deckHash.value);
 watch(() => builtDeck, () => {
   // sort cards by cost
   builtDeck.value.sort((a, b) => a.cost - b.cost);
+}, { deep: true });
+
+watchDebounced([filter, language], async () => {
+  // If no clan is selected, do nothing
+  if (!selectedClan.value)
+    return;
+  // Reset the state
+  filteredCards.value = null;
+  fetchError.value = null;
+  // Fetch cards
+  const { cards, error } = await useFetchCards(filter);
+  // Filter out tokens
+  filteredCards.value = cards.value?.filter(card => !isToken(card)) ?? null;
+  fetchError.value = error.value;
 }, {
+  debounce: 500,
+  immediate: true,
   deep: true,
+  maxWait: 2000,
 });
 </script>
