@@ -52,7 +52,7 @@
         <template #heading>
           <h2
             class="text-2xl dark:text-white font-semibold py-6 mx-4
-          border-b border-slate-900/10 dark:border-slate-50/[0.06] transition-colors"
+          border-b border-slate-900/10 dark:border-slate-50/[0.06]"
           >
             Cards
           </h2>
@@ -82,20 +82,40 @@
         <template #heading>
           <h2
             class="text-2xl dark:text-white font-semibold py-6 mx-4
-            border-b border-slate-900/10 dark:border-slate-50/[0.06] transition-colors"
+            border-b border-slate-900/10 dark:border-slate-50/[0.06]"
           >
             Deck
-            <span class="border-l pl-4 border-slate-900/10 dark:border-slate-50/[0.06] transition-colors">
+            <span
+              class="border-l pl-4 border-slate-900/10 dark:border-slate-50/[0.06]"
+              :class="{ 'text-red-500 dark:text-red-400': !isValidDeck }"
+            >
               {{ totalCardCountInDeck }} / 40
             </span>
+
+            <button
+              :disabled="!isValidDeck || !isSupported || copied"
+              class="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-300
+              px-4 py-2 rounded ml-4 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors
+              disabled:opacity-50 disabled:cursor-not-allowed"
+              @click="copy(deckUrl)"
+            >
+              {{ copied ? 'Copied!' : 'Copy Link' }}
+            </button>
           </h2>
         </template>
 
         <div
           class="flex gap-4
             overflow-x-scroll overflow-y-hidden mx-6 mb-10 py-4
-            border-b border-slate-900/10 dark:border-slate-50/[0.06] transition-colors"
+            border-b border-slate-900/10 dark:border-slate-50/[0.06]"
         >
+          <p
+            v-if="!builtDeck.length"
+            class="text-lg text-center w-full text-black/45 dark:text-slate-300/45"
+          >
+            No cards in the deck
+          </p>
+
           <div
             v-for="card in builtDeck"
             :key="card.card_id"
@@ -104,14 +124,13 @@
             @click="removeFromDeck(card)"
           >
             <!-- Red layer -->
-            <div v-if="!isValidCard(card)" class="absolute inset-0 bg-red-500 bg-opacity-50 rounded-lg" />
+            <div v-if="!isValidCard(card)" class="absolute z-10 inset-0 bg-red-500 bg-opacity-50 rounded-lg" />
 
             <CardImage :card="card" class="m-1" />
             <p class="text-center dark:text-white">
               × {{ card.count }}
             </p>
           </div>
-          {{ deckUrl }}
         </div>
       </ContainerTemplate>
     </div>
@@ -132,16 +151,14 @@
 import { computed, ref, watch } from 'vue';
 import { AdjustmentsHorizontalIcon } from '@heroicons/vue/24/solid';
 import { storeToRefs } from 'pinia';
-import { watchDebounced } from '@vueuse/core';
-import FilterPanel from '@/components/FilterPanel/FilterPanel.vue';
+import { useClipboard, watchDebounced } from '@vueuse/core';
 import CardGallery from '@/components/CardGallery/CardGallery.vue';
-import DeckBuilder from '@/components/DeckBuilder/DeckBuilder.vue';
 import { useFetchCards } from '@/composables/useFetchCards';
 import type { Card, CardFilterProperty, CardInDeck, CardProperty } from '@/types/card';
 import CardImage from '@/components/CardGallery/CardImage.vue';
 import FilterPanelModal from '@/components/FilterPanel/FilterPanelModal.vue';
 import { useUserStore } from '@/stores/user';
-import { cardSetsData, clansData } from '@/config/card_properties';
+import { clansData } from '@/config/card_properties';
 import { useCardProperties } from '@/composables/useCardProperties';
 import { useCheckCardProperties } from '@/composables/useCheckCardProperties';
 import ContainerTemplate from '@/components/Template/ContainerTemplate.vue';
@@ -188,31 +205,35 @@ const disabledProperties = computed(() => {
 const totalCardCountInDeck = computed(() => builtDeck.value.reduce((acc, c) => acc + c.count, 0));
 
 function isValidCard(card: Card) {
+  // If card format type is unlimited, check if the card is in the selected format
+  // unlimited format card can only be added if the selected format is unlimited
   if (card.format_type === 0)
     return card.format_type === filter.value.format?.id;
-  return card.format_type === 1;
+  // If card format type is rotation, check if the selected format is rotation
+  else
+    return card.format_type === 1;
 }
+
+const isValidDeck = computed(() => {
+  return totalCardCountInDeck.value === 40 && builtDeck.value.every(isValidCard);
+});
 
 function toggleFilterPanel() {
   isFilterPanelModalOpen.value = !isFilterPanelModalOpen.value;
 }
 
-function addCardToDeck(card: Card) {
-  const cardInDeck = builtDeck.value.find(c => c.card_id === card.card_id);
+function addCardToDeck(pickedCard: Card) {
+  const cardInDeck = builtDeck.value.find(c => c.card_id === pickedCard.card_id);
   // Sum all count if they have the same base_card_id
-  const totalCardCountByCard = builtDeck.value.filter(c => c.base_card_id === card.base_card_id).reduce((acc, c) => acc + c.count, 0);
-  const totalCardCountInDeck = builtDeck.value.reduce((acc, c) => acc + c.count, 0);
-
-  if (totalCardCountInDeck >= 40)
-    return;
+  const totalCardCountByCard = builtDeck.value.filter(c => c.base_card_id === pickedCard.base_card_id).reduce((acc, c) => acc + c.count, 0);
 
   if (cardInDeck) {
     if (totalCardCountByCard < cardInDeck.restricted_count)
       cardInDeck.count += 1;
   }
   else {
-    if (totalCardCountByCard < card.restricted_count)
-      builtDeck.value.push({ ...card, count: 1 });
+    if (totalCardCountByCard < pickedCard.restricted_count)
+      builtDeck.value.push({ ...pickedCard, count: 1 });
   }
 }
 
@@ -234,20 +255,26 @@ function handleSelecteClan(clan: CardProperty) {
 
 const deckHash = computed(() => {
   const radix = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
-  let ret = `1.${selectedClan.value?.id}.`;
-  builtDeck.value.forEach((card) => {
+  let hash = `1.${selectedClan.value?.id}.`;
+
+  for (const card of builtDeck.value) {
     let temp = '';
-    let tempKey: string | number = String(card.card_id);
-    while (Number.parseInt(String(tempKey), 10) > 0) {
-      temp += radix[Number.parseInt(String(tempKey), 10) % 64];
-      tempKey = Math.floor(Number.parseInt(String(tempKey), 10) / 64);
+    let tempKey = card.card_id;
+
+    while (tempKey > 0) {
+      temp += radix[tempKey % 64];
+      tempKey = Math.floor(tempKey / 64);
     }
-    ret += `${temp.split('').reverse().join('')}.`.repeat(card.count);
-  });
-  return ret.substring(0, ret.length - 1);
+
+    hash += `${temp.split('').reverse().join('')}.`.repeat(card.count);
+  }
+
+  return hash.substring(0, hash.length - 1);
 });
 
 const deckUrl = computed(() => portalUrl + deckHash.value);
+
+const { copy, copied, isSupported } = useClipboard({ legacy: true, source: deckUrl });
 
 watch(() => builtDeck, () => {
   // sort cards by cost
