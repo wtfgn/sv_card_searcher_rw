@@ -12,8 +12,9 @@ import {
   tribeNamesData,
 } from '@/config/card_properties';
 import type { useUserStore } from '@/stores/user';
+import type { LangaugeType } from '@/types/user';
 
-export function useCardProperties(language: ReturnType<typeof useUserStore>['language']) {
+export function useCardProperties(language: LangaugeType) {
   const clans = clansData[language];
   const charTypes = charTypesData[language];
   const tribeNames = tribeNamesData[language];

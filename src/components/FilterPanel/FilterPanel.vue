@@ -24,7 +24,7 @@
           <FilterPanelListBox
             v-model="selectedProperties.clans"
             class="w-full rounded text-lg col-span-full"
-            :options="[...clans].filter((clan) => !disabledProperties?.clans?.includes(clan))"
+            :options="allowedCardProperties.clans"
             label="Clan"
             multiple
           />
@@ -33,7 +33,7 @@
           <FilterPanelListBox
             v-model="selectedProperties.cardSets"
             class="w-full rounded text-lg col-span-full"
-            :options="[...cardSets]"
+            :options="allowedCardProperties.cardSets"
             label="Card Set"
             multiple
           />
@@ -42,7 +42,7 @@
           <FilterPanelRadioGroup
             v-model="selectedProperties.format"
             class="w-full rounded text-lg col-span-full"
-            :options="[...formats]"
+            :options="allowedCardProperties.formats"
             label="Format"
             options-container-class="flex flex-row gap-4 justify-evenly"
           />
@@ -51,7 +51,7 @@
           <FilterPanelListBox
             v-model="selectedProperties.charTypes"
             class="w-full rounded text-lg col-span-full"
-            :options="[...charTypes]"
+            :options="allowedCardProperties.charTypes"
             label="Character Type"
             multiple
           />
@@ -60,7 +60,7 @@
           <FilterPanelListBox
             v-model="selectedProperties.rarities"
             class="w-full rounded text-lg col-span-full"
-            :options="[...rarities]"
+            :options="allowedCardProperties.rarities"
             label="Rarity"
             multiple
           />
@@ -69,7 +69,7 @@
           <FilterPanelListBox
             v-model="selectedProperties.costs"
             class="w-full rounded text-lg col-span-full"
-            :options="[...costs]"
+            :options="allowedCardProperties.costs"
             label="Cost"
             multiple
           />
@@ -78,7 +78,7 @@
           <FilterPanelListBox
             v-model="selectedProperties.atks"
             class="w-full rounded text-lg"
-            :options="[...atks]"
+            :options="allowedCardProperties.atks"
             label="Attack"
             multiple
           />
@@ -87,7 +87,7 @@
           <FilterPanelListBox
             v-model="selectedProperties.lifes"
             class="w-full rounded text-lg"
-            :options="[...lifes]"
+            :options="allowedCardProperties.lifes"
             label="Life"
             multiple
           />
@@ -96,7 +96,7 @@
           <FilterPanelListBox
             v-model="selectedProperties.tribeNames"
             class="w-full rounded text-lg"
-            :options="[...tribeNames]"
+            :options="allowedCardProperties.tribeNames"
             label="Tribe Name"
             multiple
           />
@@ -105,7 +105,7 @@
           <FilterPanelListBox
             v-model="selectedProperties.restrictedCounts"
             class="w-full rounded text-lg"
-            :options="[...restrictedCounts]"
+            :options="allowedCardProperties.restrictedCounts"
             label="Restricted Count"
             multiple
           />
@@ -114,7 +114,7 @@
           <FilterPanelRadioGroup
             v-model="selectedProperties.resurgentProperty"
             class="w-full rounded text-lg col-span-full"
-            :options="[...resurgentProperties]"
+            :options="allowedCardProperties.resurgentProperties"
             label="Is Resurgent?"
             options-container-class="flex flex-row gap-4 justify-evenly"
           />
@@ -140,7 +140,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch, watchEffect } from 'vue';
+import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { RadioGroupDescription, RadioGroupLabel } from '@headlessui/vue';
 import axios from 'axios';
@@ -158,15 +158,19 @@ import { useFetchCards } from '@/composables/useFetchCards';
 import ContainerTemplate from '@/components/Template/ContainerTemplate.vue';
 import type { UseFetchCardsReturn } from '@/composables/useFetchCards';
 
-defineProps({
+const props = defineProps({
   disabledProperties: {
     type: Object as PropType<CardFilterProperty>,
   },
 });
 
+const selectedProperties = defineModel<CardFilterProperty>('selectedProperties', {
+  type: Object as PropType<CardFilterProperty>,
+  required: true,
+});
+
 const userStore = useUserStore();
 const { language } = storeToRefs(userStore);
-
 const {
   clans,
   charTypes,
@@ -181,9 +185,20 @@ const {
   resurgentProperties,
 } = useCardProperties(language.value);
 
-const selectedProperties = defineModel<CardFilterProperty>('selectedProperties', {
-  type: Object as PropType<CardFilterProperty>,
-  required: true,
+const allowedCardProperties = computed(() => {
+  return {
+    clans: clans.filter(clan => !props.disabledProperties?.clans?.includes(clan)),
+    charTypes: charTypes.filter(charType => !props.disabledProperties?.charTypes?.includes(charType)),
+    tribeNames: tribeNames.filter(tribeName => !props.disabledProperties?.tribeNames?.includes(tribeName)),
+    cardSets: cardSets.filter(cardSet => !props.disabledProperties?.cardSets?.includes(cardSet)),
+    costs: costs.filter(cost => !props.disabledProperties?.costs?.includes(cost)),
+    atks: atks.filter(atk => !props.disabledProperties?.atks?.includes(atk)),
+    lifes: lifes.filter(life => !props.disabledProperties?.lifes?.includes(life)),
+    rarities: rarities.filter(rarity => !props.disabledProperties?.rarities?.includes(rarity)),
+    formats: formats.filter(format => props.disabledProperties?.format?.id !== format.id),
+    restrictedCounts: restrictedCounts.filter(restrictedCount => !props.disabledProperties?.restrictedCounts?.includes(restrictedCount)),
+    resurgentProperties: resurgentProperties.filter(resurgentProperty => props.disabledProperties?.resurgentProperty?.id !== resurgentProperty.id),
+  };
 });
 
 function clearFilters() {
