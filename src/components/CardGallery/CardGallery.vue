@@ -34,7 +34,7 @@
       <!-- Loading -->
       <slot v-else-if="!props.fetchError" name="loading">
         <div class="flex justify-center items-center h-96">
-          <Spinner class="h-12 w-12 text-sky-600 dark:text-sky-300" />
+          <Spinner class="h-12 w-12 text-sky-600 dark:text-sky-400" />
         </div>
       </slot>
 
