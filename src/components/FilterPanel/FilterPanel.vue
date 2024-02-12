@@ -2,7 +2,7 @@
   <ContainerTemplate>
     <template #heading>
       <h2
-        class="text-2xl mb-6 dark:text-white font-semibold
+        class="text-2xl mb-6 pb-2 dark:text-white font-semibold
       border-b border-slate-900/10 dark:border-slate-50/[0.06] transition-colors"
       >
         Filters
@@ -127,8 +127,10 @@
       <slot name="button-bar">
         <div class="flex justify-end mt-6">
           <button
-            class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300
-          px-4 py-2 rounded ml-4 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            :class="isDark
+              ? 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+              : 'bg-slate-200 hover:bg-slate-300 text-slate-800'"
+            class="px-4 py-2 rounded ml-4 transition-colors"
             @click="clearFilters"
           >
             Clear
@@ -142,21 +144,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import { RadioGroupDescription, RadioGroupLabel } from '@headlessui/vue';
-import axios from 'axios';
 import type { PropType } from 'vue';
-import { watchDebounced } from '@vueuse/core';
 import FilterPanelRadioGroup from '@/components/FilterPanel/FilterPanelRadioGroup.vue';
-import FilterPanelComboBox from '@/components/FilterPanel/FilterPanelComboBox.vue';
 import FilterPanelInput from '@/components/FilterPanel/FilterPanelInput.vue';
 import FilterPanelListBox from '@/components/FilterPanel/FilterPanelListBox.vue';
-import { baseUrl } from '@/config/api';
-import type { Card, CardFilterProperty, CardProperty } from '@/types/card';
+import type { CardFilterProperty, CardProperty } from '@/types/card';
 import { useUserStore } from '@/stores/user';
 import { useCardProperties } from '@/composables/useCardProperties';
-import { useFetchCards } from '@/composables/useFetchCards';
 import ContainerTemplate from '@/components/Template/ContainerTemplate.vue';
-import type { UseFetchCardsReturn } from '@/composables/useFetchCards';
 
 const props = defineProps({
   disabledProperties: {
@@ -170,7 +165,7 @@ const selectedProperties = defineModel<CardFilterProperty>('selectedProperties',
 });
 
 const userStore = useUserStore();
-const { language } = storeToRefs(userStore);
+const { language, isDark } = storeToRefs(userStore);
 const {
   clans,
   charTypes,

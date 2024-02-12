@@ -1,20 +1,26 @@
 <template>
   <Listbox v-model="selectedOptions" :horizontal="props.horizontal" :multiple="props.multiple">
     <div class="relative mt-1">
-      <ListboxLabel class="block text-lg mb-2 dark:text-gray-300 font-medium truncate">
+      <ListboxLabel
+        class="block text-lg mb-2 font-medium truncate"
+        :class="isDark ? 'text-gray-300' : ''"
+      >
         {{ props.label }}
       </ListboxLabel>
 
       <ListboxButton
-        class="relative w-full cursor-default rounded bg-white py-2 pl-3 pr-10 text-left sm:text-sm
-        form-input-border focus-visible:form-input-outline form-input-bg form-input-text-colour"
+        :class="isDark
+          ? 'form-input-border-dark focus-visible:form-input-outline-dark form-input-bg-dark form-input-text-colour-dark'
+          : 'form-input-border-light focus-visible:form-input-outline-light form-input-bg-light form-input-text-colour-light'
+        "
+        class="relative w-full cursor-default rounded py-2 pl-3 pr-10 text-left sm:text-sm"
       >
         <span
           class="text-lg block truncate"
           :class="[
-            isNoSelectedOptions ? 'text-gray-400' : 'text-gray-900',
-            isDark ? 'dark:text-gray-300' : '',
-            isDark && isNoSelectedOptions ? 'dark:text-gray-400' : '',
+            isNoSelectedOptions
+              ? isDark ? 'text-gray-400' : 'text-gray-400'
+              : isDark ? '' : 'text-gray-900',
           ]"
         >
           {{ slectedOptionsFormatted }}
@@ -35,9 +41,11 @@
         leave-to-class="opacity-0"
       >
         <ListboxOptions
-          class="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1  focus:outline-none sm:text-sm
-          dark:bg-gray-700 dark:ring-gray-800 flex ring-black/5 z-10"
-          :class="[$props.horizontal ? 'flex-row' : 'flex-col', optionsContainerClass]"
+          class="absolute mt-1 max-h-60 w-full overflow-auto rounded-md py-1 text-base shadow-lg ring-1 focus:outline-none sm:text-sm flex z-10"
+          :class="[
+            $props.horizontal ? 'flex-row' : 'flex-col', optionsContainerClass,
+            isDark ? 'bg-gray-700 ring-gray-800' : 'bg-white ring-black/5',
+          ]"
         >
           <ListboxOption
             v-for="option in props.options"
@@ -49,9 +57,10 @@
             <slot name="option" :option="option" :active="active" :selected="selected" :is-dark="isDark" :horizontal="props.horizontal">
               <li
                 class="relative cursor-default select-none py-2 flex" :class="[
-                  active ? 'bg-sky-100 text-sky-900' : 'text-gray-900',
-                  isDark ? 'dark:text-gray-300 dark:bg-gray-700' : '',
-                  isDark && active ? 'dark:bg-sky-800 dark:text-sky-100' : '',
+                  active
+                    ? isDark ? 'bg-sky-800 text-sky-100' : 'bg-sky-100 text-sky-900'
+                    : isDark ? 'text-gray-300' : 'text-gray-900',
+
                   horizontal ? 'flex-1 px-4 justify-center' : 'w-full pl-10 pr-4',
                 ]"
               >
@@ -63,8 +72,11 @@
                 >{{ option.name }}</span>
                 <span
                   v-if="selected"
-                  class="inset-y-0 left-0 flex items-center pl-3 text-sky-600 dark:text-sky-300"
-                  :class="horizontal ? 'right-0' : 'absolute'"
+                  class="inset-y-0 left-0 flex items-center pl-3  "
+                  :class="[
+                    horizontal ? 'right-0' : 'absolute',
+                    isDark ? 'dark:text-sky-300' : 'text-sky-600',
+                  ]"
                 >
                   <CheckIcon class="h-5 w-5" aria-hidden="true" />
                 </span>

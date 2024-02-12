@@ -1,7 +1,7 @@
 <template>
   <RadioGroup v-model="selectedOption">
     <div class="flex flex-col w-full">
-      <RadioGroupLabel class="block text-lg mb-2 dark:text-gray-300 font-medium truncate">
+      <RadioGroupLabel class="block text-lg mb-2 font-medium truncate" :class="{ 'text-gray-300': isDark }">
         {{ props.label }}
       </RadioGroupLabel>
 
@@ -16,24 +16,38 @@
           <slot name="option" :option="option" :active="active" :checked="checked">
             <div
               :class="[
-                active ? ' form-input-outline' : '',
-                checked ? 'dark:bg-sky-800/20 bg-sky-100/50 form-input-outline' : 'bg-white ',
+                active
+                  ? isDark ? 'form-input-outline-dark'
+                    : 'form-input-outline-light'
+                  : '',
+                checked
+                  ? isDark ? 'bg-sky-800/20 form-input-outline-dark'
+                    : 'bg-sky-100/50 form-input-outline-light'
+                  : '',
+                isDark ? 'form-input-border-dark form-input-bg-dark form-input-text-colour-dark'
+                : 'form-input-border-light form-input-bg-light form-input-text-colour-light',
               ]"
-              class="relative flex-1 cursor-pointer rounded-lg pl-3 py-2 pr-4 form-input-border form-input-bg form-input-text-colour truncate"
+              class="relative flex-1 cursor-pointer rounded-lg pl-3 py-2 pr-4 truncate transition-colors"
             >
               <div class="flex w-full items-center justify-between">
                 <div class="flex items-center">
                   <div class="text-lg">
                     <RadioGroupLabel
                       as="p"
-                      :class="checked ? ' text-sky-900 dark:text-sky-300' : 'text-gray-900 dark:text-gray-300'"
+                      :class="checked
+                        ? isDark ? 'dark:text-sky-300' : 'text-sky-900'
+                        : isDark ? 'dark:text-gray-300' : 'text-gray-900'
+                      "
                       class="font-medium"
                     >
                       {{ option.name }}
                     </RadioGroupLabel>
                     <RadioGroupDescription
                       as="span"
-                      :class="checked ? ' text-sky-500 dark:text-sky-400' : 'text-gray-500 dark:text-gray-400'"
+                      :class="checked
+                        ? isDark ? 'text-sky-400' : 'text-sky-500'
+                        : isDark ? 'text-gray-400' : 'text-gray-500'
+                      "
                       class="inline text-sm"
                     >
                     <!-- <span aria-hidden="true">  </span> -->
@@ -42,7 +56,8 @@
                 </div>
                 <div v-show="checked" class="shrink-0">
                   <CheckIcon
-                    class="h-5 w-5 text-sky-600 dark:text-sky-300"
+                    :class="isDark ? 'text-sky-300' : 'text-sky-600'"
+                    class="h-5 w-5"
                     aria-hidden="true"
                   />
                 </div>
@@ -64,7 +79,9 @@ import {
 } from '@headlessui/vue';
 import type { PropType } from 'vue';
 import { CheckIcon } from '@heroicons/vue/20/solid';
+import { storeToRefs } from 'pinia';
 import type { CardProperty } from '@/types/card';
+import { useUserStore } from '@/stores/user';
 
 const props = defineProps({
   options: {
@@ -82,4 +99,6 @@ const props = defineProps({
 });
 
 const selectedOption = defineModel<CardProperty>();
+const userStore = useUserStore();
+const { isDark } = storeToRefs(userStore);
 </script>

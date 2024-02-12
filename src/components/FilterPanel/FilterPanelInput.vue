@@ -1,15 +1,18 @@
 <template>
   <input
     v-model="model"
-    class="dark:text-gray-300 dark:focus:bg-sky-800/20 focus:bg-sky-100/50
-    form-input-border focus-visible:form-input-outline form-input-bg form-input-text-colour"
+    :disabled="$props.disabled"
+    :class="styleClasses"
+    class="disabled:cursor-not-allowed"
     :type="$props.type"
     :placeholder="$props.placeholder"
   >
 </template>
 
 <script setup lang="ts">
-import type { InputTypeHTMLAttribute, PropType } from 'vue';
+import { type InputTypeHTMLAttribute, type PropType, computed } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useUserStore } from '@/stores/user';
 
 defineProps({
   placeholder: {
@@ -20,6 +23,18 @@ defineProps({
     type: String as PropType<InputTypeHTMLAttribute>,
     default: 'text',
   },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
 });
 const model = defineModel<string>();
+const userStore = useUserStore();
+const { isDark } = storeToRefs(userStore);
+
+const styleClasses = computed(() =>
+  isDark.value
+    ? 'form-input-border-dark form-input-bg-dark form-input-text-colour-dark focus-visible:form-input-outline-dark focus:bg-sky-800/20 disabled:bg-gray-700 disabled:text-gray-300"'
+    : 'form-input-border-light focus-visible:form-input-outline-light form-input-bg-light form-input-text-colour-light focus:bg-sky-100/50 disabled:bg-gray-200 disabled:text-gray-800',
+);
 </script>
