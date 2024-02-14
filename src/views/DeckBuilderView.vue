@@ -95,18 +95,25 @@
             <!-- Buttons -->
             <div class="inline-flex flex-row flex-wrap gap-4 ">
               <button
-                :disabled="!isValidDeck"
+                :disabled="!isValidDeck || isPublishingDeckCode"
                 class="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-300
                 px-4 py-2 rounded hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors
                 disabled:opacity-50 disabled:cursor-not-allowed text-xl flex-1 "
                 @click="publishDeckCode"
               >
-                <div class="flex items-center justify-center relative min-w-[8rem]">
-                  <span v-if="!isPublishingDeckCode" class="hidden md:inline-block">Publish Code</span>
-                  <span v-else class="text-slate-800 dark:text-slate-300">
-                    <Spinner class="w-7 h-7" />
-                  </span>
-                  <DocumentArrowUpIcon class="w-8 h-8 md:hidden" />
+                <div>
+                  <p class="hidden md:flex items-center justify-center relative gap-4">
+                    <span>
+                      Publish Code
+                    </span>
+                    <span v-if="isPublishingDeckCode">
+                      <Spinner class="w-7 h-7" />
+                    </span>
+                  </p>
+                  <p class="md:hidden flex items-center justify-center relative gap-4">
+                    <DocumentArrowUpIcon v-if="!isPublishingDeckCode" class="w-8 h-8" />
+                    <Spinner v-else class="w-7 h-7" />
+                  </p>
                 </div>
               </button>
 
@@ -413,6 +420,9 @@ watchDebounced([filter, language], async () => {
   filteredCards.value = null;
   fetchError.value = null;
   // Fetch cards
+  // If no clans are selected, automatically select the selected clan & neutral
+  if (!filter.value.clans?.length)
+    filter.value.clans = [selectedClan.value, clans[0]];
   const { cards, error } = await useFetchCards(filter);
   // Filter out tokens
   filteredCards.value = cards.value?.filter(card => !isToken(card)) ?? null;
@@ -423,4 +433,4 @@ watchDebounced([filter, language], async () => {
   deep: true,
   maxWait: 2000,
 });
-</script>@/composables/usePublishDeckCode
+</script>
