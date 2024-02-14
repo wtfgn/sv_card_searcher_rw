@@ -13,7 +13,7 @@
           ? 'form-input-border-dark focus-visible:form-input-outline-dark form-input-bg-dark form-input-text-colour-dark'
           : 'form-input-border-light focus-visible:form-input-outline-light form-input-bg-light form-input-text-colour-light'
         "
-        class="relative w-full cursor-default rounded py-2 pl-3 pr-10 text-left sm:text-sm"
+        class="relative w-full cursor-default rounded py-2 pl-3 pr-10 text-left sm:text-sm transition-colors "
       >
         <span
           class="text-lg block truncate"

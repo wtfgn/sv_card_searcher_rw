@@ -104,20 +104,21 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue';
-import { ref, watchEffect } from 'vue';
+import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import axios from 'axios';
 import FilterPanelInput from '../FilterPanel/FilterPanelInput.vue';
 import { useUserStore } from '@/stores/user';
-import type { CardInDeck } from '@/types/card';
-import { baseUrl } from '@/config/api';
+import { useParseDeckCode } from '@/composables/useParseDeckCode';
+import { useParseDeckHash } from '@/composables/useParseDeckHash';
+import type { ParsedDeckHashData } from '@/composables/useParseDeckHash';
 
-export interface ParsedDeckHashData {
-  clanId: number | null
-  deck: CardInDeck[] | null
-  deckSize: number | null
-  error: Error | null
-  isFetching: boolean
+export interface LoadDeckInfo {
+  deckHashData: ParsedDeckHashData | null
+  isLoadingDeck: boolean
+  error: {
+    parseDeckCodeError: Error | null
+    parseDeckHashError: Error | null
+  }
 }
 
 defineProps({
@@ -135,7 +136,17 @@ const deckCode = ref('');
 const userStore = useUserStore();
 const { isDark } = storeToRefs(userStore);
 
-const parsedDechHashData = ref<ParsedDeckHashData | null>(null);
+const isLoadingDeck = ref(false);
+const { parsedHash, parseDeckCodeError, parseDeckCode } = useParseDeckCode();
+const { parsedDeckHashData, parseDeckHashError, parseDeckHash } = useParseDeckHash();
+const loadDeckInfo = computed(() => ({
+  deckHashData: parsedDeckHashData.value,
+  isLoadingDeck: isLoadingDeck.value,
+  error: {
+    parseDeckCodeError: parseDeckCodeError.value,
+    parseDeckHashError: parseDeckHashError.value,
+  },
+}));
 
 function handleLoadDeckButtonClick() {
   if (portalDeckUrl.value)
@@ -149,65 +160,22 @@ function handleLoadDeckButtonClick() {
 async function loadDeck(deckUrlOrCode: string, type: 'portal' | 'code') {
   let portalDeckUrl = '';
   let deckCode = '';
-  let parsedDeckHashData: ParsedDeckHashData = {
-    clanId: null,
-    deck: null,
-    deckSize: null,
-    error: null,
-    isFetching: true,
-  };
 
-  parsedDechHashData.value = parsedDeckHashData;
+  isLoadingDeck.value = true;
+  emit('loadDeck', loadDeckInfo.value);
 
   if (type === 'portal') {
     portalDeckUrl = deckUrlOrCode;
     const deckHash = portalDeckUrl.substring(portalDeckUrl.search(/\d\.\d\./g), portalDeckUrl.search(/\?/g));
-    parsedDeckHashData = await parseDeckHash(deckHash);
+    await parseDeckHash(deckHash);
   }
   else if (type === 'code') {
     deckCode = deckUrlOrCode;
-    const { hash } = await parseDeckCode(deckCode);
-    parsedDeckHashData = await parseDeckHash(hash);
+    await parseDeckCode(deckCode);
+    await parseDeckHash(parsedHash);
   }
 
-  parsedDechHashData.value = parsedDeckHashData;
+  isLoadingDeck.value = false;
+  emit('loadDeck', loadDeckInfo.value);
 }
-
-async function parseDeckHash(deckHash: string): Promise<ParsedDeckHashData> {
-  let clanId: number | null = null;
-  let deck: CardInDeck[] | null = null;
-  let deckSize: number | null = null;
-  let error: Error | null = null;
-
-  try {
-    const response = await axios.get(`${baseUrl}/deckhash/${deckHash}`);
-    const data = response.data;
-    clanId = data.craftId;
-    deck = data.deck;
-    deckSize = data.deckSize;
-  }
-  catch (e) {
-    error = e as Error;
-  }
-  return { clanId, deck, deckSize, error, isFetching: false };
-}
-
-async function parseDeckCode(deckCode: string): Promise<{ hash: string, error: Error | null }> {
-  let hash = '';
-  let error: Error | null = null;
-  try {
-    const response = await axios.get(`https://svgdb.me/api/deckcode/${deckCode}`);
-    hash = response.data.hash;
-  }
-  catch (e) {
-    error = e as Error;
-  }
-  return { hash, error };
-}
-
-watchEffect(() => {
-  if (!parsedDechHashData.value)
-    return;
-  emit('loadDeck', parsedDechHashData.value);
-});
 </script>

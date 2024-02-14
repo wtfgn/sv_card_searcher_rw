@@ -3,7 +3,7 @@
     v-model="model"
     :disabled="$props.disabled"
     :class="styleClasses"
-    class="disabled:cursor-not-allowed"
+    class="disabled:cursor-not-allowed transition-colors "
     :type="$props.type"
     :placeholder="$props.placeholder"
   >

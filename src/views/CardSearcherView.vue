@@ -1,6 +1,6 @@
 <template>
-  <div class="dark:bg-slate-900 p-6">
-    <h1 class="text-3xl mb-4 dark:text-white font-semibold">
+  <div class="dark:bg-slate-900 bg-slate-100 p-6 transition-colors">
+    <h1 class="text-3xl mb-4 dark:text-white text-black font-bold">
       Card Searcher
     </h1>
 

@@ -10,9 +10,14 @@ export const useUserStore = defineStore('user', () => {
     isDark.value = !isDark.value;
   };
 
+  const setTheme = (theme: boolean) => {
+    isDark.value = theme;
+  };
+
   return {
     isDark,
     switchTheme,
     language,
+    setTheme,
   };
 });

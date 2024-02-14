@@ -5,7 +5,7 @@
     </h1>
 
     <div v-if="!selectedClan" class="flex flex-col gap-4 ">
-      <h2 class="text-2xl dark:text-white font-semibold py-6 mx-4 border-b border-slate-900/10 dark:border-slate-50/[0.06] transition-colors text-center">
+      <h2 class="text-2xl font-semibold py-6 mx-4 border-b border-slate-900/10 dark:border-slate-50/[0.06] transition-colors text-center text-slate-800 dark:text-slate-300">
         Select a clan to start building a deck
       </h2>
 
@@ -13,16 +13,16 @@
         <template v-for="clan in clans" :key="clan.id">
           <div
             v-if="clan.id !== 0"
-            class="duration-300 ease-in-out w-fit hover:transform hover:scale-105 justify-self-center cursor-pointer"
+            class="group duration-300 ease-in-out w-fit hover:transform hover:scale-105 justify-self-center cursor-pointer"
             @click="handleSelecteClan(clan)"
           >
             <img
               :src="`/src/assets/clan_icons/${clan.id}.png`"
               :alt="clan.name"
-              class="w-24 h-24 p-2 rounded-full hover:ring-2 hover:ring-slate-200 dark:hover:ring-slate-700 transition-all"
+              class="w-24 h-24 p-2 rounded-full group-hover:ring-2 group-hover:ring-slate-200 dark:group-hover:ring-slate-700 transition-all"
             >
 
-            <p class="text-lg dark:text-white text-center">
+            <p class="text-lg  text-center text-slate-800 dark:text-slate-300">
               {{ clan.name }}
             </p>
           </div>
@@ -40,8 +40,8 @@
       >
         <template #heading>
           <h2
-            class="flex text-2xl dark:text-white font-semibold py-6 mx-4 items-center
-            border-b border-slate-900/10 dark:border-slate-50/[0.06]"
+            class="flex text-2xl font-semibold py-6 mx-4 items-center
+            border-b border-slate-900/10 dark:border-slate-50/[0.06] text-slate-800 dark:text-slate-300"
           >
             <span>Cards</span>
 
@@ -79,9 +79,10 @@
       <ContainerTemplate class="w-full">
         <template #heading>
           <h2
-            class="text-2xl dark:text-white font-semibold py-6 mx-4
+            class="text-2xl font-semibold py-6 mx-4
             border-b border-slate-900/10 dark:border-slate-50/[0.06]
-            flex items-center gap-4 flex-wrap truncate"
+            flex items-center gap-4 flex-wrap truncate
+            text-slate-800 dark:text-slate-300"
           >
             <span>Deck</span>
             <span
@@ -98,10 +99,13 @@
                 class="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-300
                 px-4 py-2 rounded hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors
                 disabled:opacity-50 disabled:cursor-not-allowed text-xl flex-1 "
-                @click="handlePublishDeckCode"
+                @click="publishDeckCode"
               >
-                <div class="flex items-center justify-center">
-                  <span class="hidden md:inline-block">Publish Code</span>
+                <div class="flex items-center justify-center relative min-w-[8rem]">
+                  <span v-if="!isPublishingDeckCode" class="hidden md:inline-block">Publish Code</span>
+                  <span v-else class="text-slate-800 dark:text-slate-300">
+                    <Spinner class="w-7 h-7" />
+                  </span>
                   <DocumentArrowUpIcon class="w-8 h-8 md:hidden" />
                 </div>
               </button>
@@ -145,31 +149,41 @@
             </div>
 
             <!-- Display Code -->
-            <div
-              v-if="deckCode"
-              class="ml-auto flex items-center text-lg text-slate-800 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 transition-colors border-solid border-2 border-slate-900/10 dark:border-slate-50/[0.06] rounded-lg"
-            >
-              <div class="flex flex-row gap-2 pl-4 px-2 border-r border-slate-900/10 dark:border-slate-50/[0.06] ">
-                <p class="text-lg ">
-                  Deck Code:
-                </p>
-                <p class="text-xl font-semibold tracking-widest ">
-                  {{ deckCode }}
-                </p>
-              </div>
-              <button
-                :disabled="!isSupported || copied"
-                class="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-300
+            <div class="ml-auto">
+              <div
+                v-if="deckCode"
+                class="flex items-center text-lg text-slate-800 dark:text-slate-300 bg-slate-200 dark:bg-slate-700
+                transition-colors border-solid border-2 border-slate-900/10 dark:border-slate-50/[0.06] rounded-lg"
+              >
+                <div class="flex flex-row items-center gap-2 pl-4 px-2 border-r border-slate-900/10 dark:border-slate-50/[0.06] ">
+                  <p class="text-lg ">
+                    Deck Code:
+                  </p>
+                  <p class="text-xl font-semibold tracking-widest ">
+                    {{ deckCode }}
+                  </p>
+                </div>
+                <button
+                  :disabled="!isSupported || copied"
+                  class="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-300
                 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors
                 disabled:opacity-50 disabled:cursor-not-allowed text-xl flex-1 p-2"
-                @click="copy(deckCode)"
-              >
-                <div
-                  class="flex items-center justify-center"
+                  @click="copy(deckCode)"
                 >
-                  <DocumentDuplicateIcon class="w-8 h-8" />
-                </div>
-              </button>
+                  <div
+                    class="flex items-center justify-center"
+                  >
+                    <DocumentDuplicateIcon class="w-8 h-8" />
+                  </div>
+                </button>
+              </div>
+
+              <div
+                v-else-if="publishDeckCodeError"
+                class="text-lg text-center w-full text-red-500 dark:text-red-400"
+              >
+                <p>Fail to publish deck code</p>
+              </div>
             </div>
           </h2>
         </template>
@@ -258,8 +272,9 @@ import ContainerTemplate from '@/components/Template/ContainerTemplate.vue';
 import { useGenerateDeckHash } from '@/composables/useGenerateDeckHash';
 import { baseUrl, portalUrl } from '@/config/api';
 import LoadDeckModal from '@/components/DeckBuilder/LoadDeckModal.vue';
-import type { ParsedDeckHashData } from '@/components/DeckBuilder/LoadDeckModal.vue';
+import type { LoadDeckInfo } from '@/components/DeckBuilder/LoadDeckModal.vue';
 import Spinner from '@/components/Icons/Spinner.vue';
+import { usePublishDeckCode } from '@/composables/usePublishDeckCode';
 
 const selectedClan = ref<CardProperty | null>(null);
 
@@ -287,12 +302,13 @@ const { copy, copied, isSupported } = useClipboard({ legacy: true });
 const filteredCards = ref<Card[] | null>(null);
 const fetchError = ref<Error | null>(null);
 
-const cardsContainerEle = ref<HTMLElement | null>(null);
 const isFilterPanelModalOpen = ref(false);
 const isLoadDeckModalOpen = ref(false);
+
+const cardsContainerEle = ref<HTMLElement | null>(null);
 const builtDeck = ref<CardInDeck[]>([]);
 const { deckHash } = useGenerateDeckHash(builtDeck, selectedClan);
-const deckCode = ref<string | null>(null);
+const { deckCode, publishDeckCode, isPublishingDeckCode, publishDeckCodeError } = usePublishDeckCode(deckHash);
 const loadDeckError = ref<Error | null>(null);
 const isFetchingDeck = ref(false);
 
@@ -369,31 +385,17 @@ function openDeckUrl() {
   window.open(deckUrl.value, '_blank');
 }
 
-function handlePublishDeckCode() {
-  axios.get(`${baseUrl}/deckcode/publish`, {
-    params: {
-      deckHash: deckHash.value,
-      lang: language.value,
-    },
-  })
-    .then((res) => {
-      deckCode.value = res.data.deckCode;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-}
-
-function handleLoadDeck(parsedDeckHashData: ParsedDeckHashData) {
-  isFetchingDeck.value = parsedDeckHashData.isFetching;
-  builtDeck.value = parsedDeckHashData.deck ?? [];
-  loadDeckError.value = parsedDeckHashData.error;
-  const clan = clans.find(clan => clan.id === parsedDeckHashData.clanId);
-
+function handleLoadDeck(loadDeckInfo: LoadDeckInfo) {
+  isFetchingDeck.value = loadDeckInfo.isLoadingDeck;
+  builtDeck.value = loadDeckInfo.deckHashData?.deck ?? [];
+  const { parseDeckCodeError, parseDeckHashError } = loadDeckInfo.error;
+  loadDeckError.value = parseDeckCodeError ?? parseDeckHashError ?? null;
+  const clan = clans.find(clan => clan.id === loadDeckInfo.deckHashData?.clanId);
   if (!clan)
     return;
 
-  if (selectedClan.value?.id !== parsedDeckHashData.clanId)
+  // If the selected clan is different from the loaded deck's clan, change the selected clan
+  if (selectedClan.value?.id !== clan.id)
     handleSelecteClan(clan);
 }
 
@@ -421,4 +423,4 @@ watchDebounced([filter, language], async () => {
   deep: true,
   maxWait: 2000,
 });
-</script>
+</script>@/composables/usePublishDeckCode
