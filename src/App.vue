@@ -43,15 +43,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useFetch } from '@vueuse/core';
+import { usePreferredDark } from '@vueuse/core';
 import Header from '@/components/Header/Header.vue';
 import Footer from '@/components/Footer.vue';
 import { useUserStore } from '@/stores/user';
 import Spinner from '@/components/Icons/Spinner.vue';
 
 const userStore = useUserStore();
+userStore.setTheme(usePreferredDark().value);
 const { isDark } = storeToRefs(userStore);
 </script>
 
