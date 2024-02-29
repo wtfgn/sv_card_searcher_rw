@@ -111,7 +111,7 @@
                     </span>
                   </p>
                   <p class="md:hidden flex items-center justify-center relative gap-4">
-                    <DocumentArrowUpIcon v-if="!isPublishingDeckCode" class="w-8 h-8" />
+                    <PublishIcon v-if="!isPublishingDeckCode" class="w-8 h-8" />
                     <Spinner v-else class="w-7 h-7" />
                   </p>
                 </div>
@@ -126,7 +126,7 @@
               >
                 <div class="flex items-center justify-center">
                   <span class="hidden md:inline-block">Open Portal</span>
-                  <ArrowTopRightOnSquareIcon class="w-8 h-8 md:hidden" />
+                  <ExternalLinkIcon class="w-8 h-8 md:hidden" />
                 </div>
               </button>
 
@@ -138,7 +138,7 @@
               >
                 <div class="flex items-center justify-center">
                   <span class="hidden md:inline-block">Clear Deck</span>
-                  <TrashIcon class="w-8 h-8 md:hidden" />
+                  <TrashBinIcon class="w-8 h-8 md:hidden" />
                 </div>
               </button>
 
@@ -151,6 +151,18 @@
                 <div class="flex items-center justify-center">
                   <span class="hidden md:inline-block">Load Deck</span>
                   <ArrowDownOnSquareStackIcon class="w-8 h-8 md:hidden" />
+                </div>
+              </button>
+
+              <button
+                class="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-300
+                px-4 py-2 rounded hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors
+                text-xl flex-1"
+                @click="isLoadDeckModalOpen = true"
+              >
+                <div class="flex items-center justify-center">
+                  <span class="hidden md:inline-block">Save Deck</span>
+                  <SaveIcon class="w-8 h-8 md:hidden" />
                 </div>
               </button>
             </div>
@@ -261,10 +273,13 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { AdjustmentsHorizontalIcon, ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/solid';
-import { ArrowDownOnSquareStackIcon, DocumentArrowUpIcon, DocumentDuplicateIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import { AdjustmentsHorizontalIcon, ArrowDownOnSquareStackIcon, DocumentDuplicateIcon } from '@heroicons/vue/24/solid';
 import { storeToRefs } from 'pinia';
 import { useClipboard, watchDebounced } from '@vueuse/core';
+import ExternalLinkIcon from '@/components/Icons/ExternalLinkIcon.vue';
+import TrashBinIcon from '@/components/Icons/TrashBinIcon.vue';
+import PublishIcon from '@/components/Icons/PublishIcon.vue';
+import SaveIcon from '@/components/Icons/SaveIcon.vue';
 import CardGallery from '@/components/CardGallery/CardGallery.vue';
 import { useFetchCards } from '@/composables/useFetchCards';
 import type { Card, CardFilterProperty, CardInDeck, CardProperty } from '@/types/card';
