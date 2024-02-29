@@ -1,5 +1,5 @@
 # sv_helper
-- Search your cards 
+- Search your cards
 - Build your own deck
 
 Relies on the api https://github.com/wtfgn/shadowverse_api
