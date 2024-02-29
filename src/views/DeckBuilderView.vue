@@ -17,7 +17,7 @@
             @click="handleSelecteClan(clan)"
           >
             <img
-              :src="`@/assets/clan_icons/${clan.id}.png`"
+              :src="`@/assets/${clan.id}.png`"
               :alt="clan.name"
               class="w-24 h-24 p-2 rounded-full group-hover:ring-2 group-hover:ring-slate-200 dark:group-hover:ring-slate-700 transition-all"
             >
