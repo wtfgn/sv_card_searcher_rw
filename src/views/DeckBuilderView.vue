@@ -265,7 +265,6 @@ import { AdjustmentsHorizontalIcon, ArrowTopRightOnSquareIcon } from '@heroicons
 import { ArrowDownOnSquareStackIcon, DocumentArrowUpIcon, DocumentDuplicateIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import { storeToRefs } from 'pinia';
 import { useClipboard, watchDebounced } from '@vueuse/core';
-import axios from 'axios';
 import CardGallery from '@/components/CardGallery/CardGallery.vue';
 import { useFetchCards } from '@/composables/useFetchCards';
 import type { Card, CardFilterProperty, CardInDeck, CardProperty } from '@/types/card';
@@ -277,7 +276,7 @@ import { useCardProperties } from '@/composables/useCardProperties';
 import { useCheckCardProperties } from '@/composables/useCheckCardProperties';
 import ContainerTemplate from '@/components/Template/ContainerTemplate.vue';
 import { useGenerateDeckHash } from '@/composables/useGenerateDeckHash';
-import { baseUrl, portalUrl } from '@/config/api';
+import { portalUrl } from '@/config/api';
 import LoadDeckModal from '@/components/DeckBuilder/LoadDeckModal.vue';
 import type { LoadDeckInfo } from '@/components/DeckBuilder/LoadDeckModal.vue';
 import Spinner from '@/components/Icons/Spinner.vue';

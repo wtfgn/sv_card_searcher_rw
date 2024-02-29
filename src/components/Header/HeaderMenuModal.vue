@@ -101,11 +101,9 @@
 import {
   Dialog,
   DialogPanel,
-  DialogTitle,
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue';
-import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { MoonIcon, SunIcon } from '@heroicons/vue/24/solid';
 import { useUserStore } from '@/stores/user';

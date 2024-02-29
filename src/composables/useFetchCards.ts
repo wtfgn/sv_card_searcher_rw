@@ -1,7 +1,6 @@
 import axios from 'axios';
-import { type Ref, toValue, watch, watchEffect } from 'vue';
+import { type Ref, toValue } from 'vue';
 import { ref } from 'vue';
-import { watchDebounced } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
 import { baseUrl } from '@/config/api';
 import type { Card, CardFilterProperty } from '@/types/card';

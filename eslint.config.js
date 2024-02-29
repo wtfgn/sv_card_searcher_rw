@@ -1,6 +1,6 @@
 /* eslint-env node */
 // require('@rushstack/eslint-patch/modern-module-resolution')
-import antfu from '@antfu/eslint-config'
+import antfu from '@antfu/eslint-config';
 
 // module.exports = {
 //   root: true,
@@ -25,4 +25,4 @@ export default antfu({
       }],
     },
   },
-})
+});

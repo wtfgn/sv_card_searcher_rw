@@ -44,7 +44,6 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronRightIcon } from '@heroicons/vue/24/solid';
 import CardPickIcon from '@/components/Icons/CardPickIcon.vue';
 import HammerIcon from '@/components/Icons/HammerIcon.vue';
 import HomeFeatureCard from '@/components/Home/HomeFeatureCard.vue';

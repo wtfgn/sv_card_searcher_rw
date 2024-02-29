@@ -61,11 +61,9 @@
 import {
   Dialog,
   DialogPanel,
-  DialogTitle,
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue';
-import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import type { PropType } from 'vue';
 import FilterPanel from './FilterPanel.vue';

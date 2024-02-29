@@ -11,7 +11,6 @@ import {
   resurgentData,
   tribeNamesData,
 } from '@/config/card_properties';
-import type { useUserStore } from '@/stores/user';
 import type { LangaugeType } from '@/types/user';
 
 export function useCardProperties(language: LangaugeType) {

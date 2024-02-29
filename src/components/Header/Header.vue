@@ -75,7 +75,7 @@
 
 <script setup lang="ts">
 import { EllipsisVerticalIcon, MoonIcon, SunIcon } from '@heroicons/vue/24/solid';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import HeaderNavItem from './HeaderNavItem.vue';
 import HeaderMenuModal from './HeaderMenuModal.vue';

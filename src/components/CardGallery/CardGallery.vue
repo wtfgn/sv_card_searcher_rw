@@ -52,8 +52,8 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue';
-import { computed, onMounted, ref, watch, watchEffect } from 'vue';
-import { useDebounceFn, useInfiniteScroll } from '@vueuse/core';
+import { computed, ref, watchEffect } from 'vue';
+import { useInfiniteScroll } from '@vueuse/core';
 import ContainerTemplate from '../Template/ContainerTemplate.vue';
 import Spinner from '../Icons/Spinner.vue';
 import CardImage from '@/components/CardGallery/CardImage.vue';

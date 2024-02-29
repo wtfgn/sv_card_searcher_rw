@@ -1,6 +1,5 @@
 import type { Ref } from 'vue';
-import { toValue, watchEffect } from 'vue';
-import type { AxiosRequestConfig } from 'axios';
+import { toValue } from 'vue';
 import type { CardFilterProperty } from '@/types/card';
 
 export function useParseFilter(filter: CardFilterProperty | (() => CardFilterProperty) | Ref<CardFilterProperty>) {
