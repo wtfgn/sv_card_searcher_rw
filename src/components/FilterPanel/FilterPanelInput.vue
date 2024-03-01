@@ -6,6 +6,7 @@
     class="disabled:cursor-not-allowed transition-colors "
     :type="$props.type"
     :placeholder="$props.placeholder"
+    :required="$props.required"
   >
 </template>
 
@@ -24,6 +25,10 @@ defineProps({
     default: 'text',
   },
   disabled: {
+    type: Boolean,
+    default: false,
+  },
+  required: {
     type: Boolean,
     default: false,
   },
