@@ -2,8 +2,8 @@
   <ContainerTemplate>
     <template #heading>
       <h2
-        class="text-2xl mb-6 pb-2 dark:text-white font-semibold
-      border-b border-slate-900/10 dark:border-slate-50/[0.06] transition-colors"
+        class="text-2xl mb-6 pb-2 font-semibold border-b transition-colors"
+        :class="isDark ? 'border-slate-50/[0.06] text-white' : 'border-slate-900/10'"
       >
         Filters
       </h2>
