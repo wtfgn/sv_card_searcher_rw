@@ -52,6 +52,37 @@
               <div class="mt-4 grid grid-cols-2 gap-4">
                 <div class="col-span-full">
                   <h3 class="text-lg mb-2 font-semibold">
+                    Saved Deck
+                  </h3>
+
+                  <ul
+                    class="w-full rounded text-base border transition-colors overflow-y-auto min-h-[200px] max-h-[200px]"
+                    :class="isDark ? ' border-slate-700' : ' border-slate-200'"
+                  >
+                    <li
+                      v-for="deck in deckStorage"
+                      :key="deck.deckHash"
+                      class="border-b transition-colors
+                      "
+                      :class="isDark ? ' border-slate-700' : ' border-slate-200'"
+                      @click="loadDeck(deck.deckHash, 'hash')"
+                    >
+                      <div class="flex items-center justify-between p-2" :class="isDark ? 'hover:bg-sky-800 hover:text-sky-100' : 'hover:bg-sky-100 hover:text-sky-900'">
+                        <span> {{ deck.name }} - [{{ deck.clan.name }}] </span>
+                        <button
+                          class=""
+                          :class="isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-600'"
+                          @click.stop="removeDeckFromStorage(deck.deckHash)"
+                        >
+                          <TrashBinIcon class="w-5 h-5" />
+                        </button>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="col-span-full">
+                  <h3 class="text-lg mb-2 font-semibold">
                     Portal Deck URL
                   </h3>
                   <FilterPanelInput
@@ -106,13 +137,16 @@ import {
 } from '@headlessui/vue';
 import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useStorage } from '@vueuse/core';
 import FilterPanelInput from '../FilterPanel/FilterPanelInput.vue';
+import TrashBinIcon from '../Icons/TrashBinIcon.vue';
 import { useUserStore } from '@/stores/user';
 import { useParseDeckCode } from '@/composables/useParseDeckCode';
 import { useParseDeckHash } from '@/composables/useParseDeckHash';
 import type { ParsedDeckHashData } from '@/composables/useParseDeckHash';
+import type { DeckInStorage } from '@/types/deck';
 
-export interface LoadDeckInfo {
+export interface DeckInfo {
   deckHashData: ParsedDeckHashData | null
   isLoadingDeck: boolean
   error: {
@@ -132,6 +166,7 @@ const emit = defineEmits(['closeModal', 'loadDeck']);
 
 const portalDeckUrl = ref('');
 const deckCode = ref('');
+const deckStorage = useStorage<DeckInStorage[]>('savedDecks', [], localStorage, { mergeDefaults: true });
 
 const userStore = useUserStore();
 const { isDark } = storeToRefs(userStore);
@@ -139,6 +174,7 @@ const { isDark } = storeToRefs(userStore);
 const isLoadingDeck = ref(false);
 const { parsedHash, parseDeckCodeError, parseDeckCode } = useParseDeckCode();
 const { parsedDeckHashData, parseDeckHashError, parseDeckHash } = useParseDeckHash();
+
 const loadDeckInfo = computed(() => ({
   deckHashData: parsedDeckHashData.value,
   isLoadingDeck: isLoadingDeck.value,
@@ -147,6 +183,10 @@ const loadDeckInfo = computed(() => ({
     parseDeckHashError: parseDeckHashError.value,
   },
 }));
+
+function removeDeckFromStorage(deckHash: string) {
+  deckStorage.value = deckStorage.value.filter(deck => deck.deckHash !== deckHash);
+}
 
 function handleLoadDeckButtonClick() {
   if (portalDeckUrl.value)
@@ -157,7 +197,7 @@ function handleLoadDeckButtonClick() {
   emit('closeModal');
 }
 
-async function loadDeck(deckUrlOrCode: string, type: 'portal' | 'code') {
+async function loadDeck(source: string, type: 'portal' | 'code' | 'hash') {
   let portalDeckUrl = '';
   let deckCode = '';
 
@@ -165,14 +205,17 @@ async function loadDeck(deckUrlOrCode: string, type: 'portal' | 'code') {
   emit('loadDeck', loadDeckInfo.value);
 
   if (type === 'portal') {
-    portalDeckUrl = deckUrlOrCode;
+    portalDeckUrl = source;
     const deckHash = portalDeckUrl.substring(portalDeckUrl.search(/\d\.\d\./g), portalDeckUrl.search(/\?/g));
     await parseDeckHash(deckHash);
   }
   else if (type === 'code') {
-    deckCode = deckUrlOrCode;
+    deckCode = source;
     await parseDeckCode(deckCode);
     await parseDeckHash(parsedHash);
+  }
+  else if (type === 'hash') {
+    await parseDeckHash(source);
   }
 
   isLoadingDeck.value = false;
