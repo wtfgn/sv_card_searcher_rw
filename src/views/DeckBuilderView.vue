@@ -4,6 +4,7 @@
       Deck Builder
     </h1>
 
+    <!-- Select Clan -->
     <div v-if="!selectedClan" class="flex flex-col gap-4 ">
       <h2 class="text-2xl font-semibold py-6 mx-4 border-b border-slate-900/10 dark:border-slate-50/[0.06] transition-colors text-center text-slate-800 dark:text-slate-300">
         Select a clan to start building a deck
@@ -13,7 +14,7 @@
         <template v-for="clan in clans" :key="clan.id">
           <div
             v-if="clan.id !== 0"
-            class="group duration-300 ease-in-out w-fit hover:transform hover:scale-105 justify-self-center cursor-pointer"
+            class="group duration-300 ease-in-out w-fit hover:transform hover:scale-105 justify-self-center cursor-pointer flex flex-1 flex-col gap-2 items-center"
             @click="handleSelecteClan(clan)"
           >
             <img
@@ -22,7 +23,7 @@
               class="w-24 h-24 p-2 rounded-full group-hover:ring-2 group-hover:ring-slate-200 dark:group-hover:ring-slate-700 transition-all"
             >
 
-            <p class="text-lg  text-center text-slate-800 dark:text-slate-300">
+            <p class="text-lg text-center text-slate-800 dark:text-slate-300">
               {{ clan.name }}
             </p>
           </div>
