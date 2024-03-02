@@ -44,7 +44,7 @@
           class="absolute mt-1 max-h-60 w-full overflow-auto rounded-md py-1 text-base shadow-lg ring-1 focus:outline-none sm:text-sm flex z-10"
           :class="[
             $props.horizontal ? 'flex-row' : 'flex-col', optionsContainerClass,
-            isDark ? 'bg-gray-700 ring-gray-800' : 'bg-white ring-black/5',
+            isDark ? 'bg-slate-700 ring-gray-800' : 'bg-white ring-black/5',
           ]"
         >
           <ListboxOption
