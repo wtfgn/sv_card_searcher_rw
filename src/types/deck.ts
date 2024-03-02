@@ -1,5 +1,8 @@
+import type { Card, CardProperty } from './card';
+
 export interface DeckInStorage {
   name: string
   deckHash: string
-  formatId: number
+  format: CardProperty
+  clan: CardProperty
 }
