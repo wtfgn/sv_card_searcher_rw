@@ -11,7 +11,7 @@
 
     <template #default>
       <slot name="default">
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-6 gap-4">
           <!-- Search -->
           <FilterPanelInput
             v-model="selectedProperties.cardName"
@@ -68,7 +68,7 @@
           <!-- Cost -->
           <FilterPanelListBox
             v-model="selectedProperties.costs"
-            class="w-full rounded text-lg col-span-full"
+            class="w-full rounded text-lg col-span-full sm:col-span-2 md:col-span-full"
             :options="allowedCardProperties.costs"
             label="Cost"
             multiple
@@ -77,7 +77,7 @@
           <!-- Attack -->
           <FilterPanelListBox
             v-model="selectedProperties.atks"
-            class="w-full rounded text-lg"
+            class="w-full rounded text-lg col-span-3 sm:col-span-2 md:col-span-3"
             :options="allowedCardProperties.atks"
             label="Attack"
             multiple
@@ -86,7 +86,7 @@
           <!-- Life -->
           <FilterPanelListBox
             v-model="selectedProperties.lifes"
-            class="w-full rounded text-lg"
+            class="w-full rounded text-lg col-span-3 sm:col-span-2 md:col-span-3"
             :options="allowedCardProperties.lifes"
             label="Life"
             multiple
@@ -95,7 +95,7 @@
           <!-- Tribe Name -->
           <FilterPanelListBox
             v-model="selectedProperties.tribeNames"
-            class="w-full rounded text-lg"
+            class="w-full rounded text-lg col-span-full"
             :options="allowedCardProperties.tribeNames"
             label="Tribe Name"
             multiple
@@ -104,7 +104,7 @@
           <!-- Restricted Count -->
           <FilterPanelListBox
             v-model="selectedProperties.restrictedCounts"
-            class="w-full rounded text-lg"
+            class="w-full rounded text-lg col-span-full"
             :options="allowedCardProperties.restrictedCounts"
             label="Restricted Count"
             multiple
