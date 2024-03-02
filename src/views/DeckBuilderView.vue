@@ -158,7 +158,7 @@
                 class="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-300
                 px-4 py-2 rounded hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors
                 text-xl flex-1"
-                @click="isLoadDeckModalOpen = true"
+                @click="isSaveDeckModalOpen = true"
               >
                 <div class="flex items-center justify-center">
                   <span class="hidden md:inline-block">Save Deck</span>
@@ -253,49 +253,61 @@
       </ContainerTemplate>
     </div>
 
-    <!-- Only one root element is allowed here -->
-    <div>
-      <FilterPanelModal
-        v-model:isOpen="isFilterPanelModalOpen"
-        v-model:selectedProperties="filter"
-        :disabled-properties="disabledProperties"
-        @close-modal="isFilterPanelModalOpen = false"
-      />
-    </div>
+    <FilterPanelModal
+      v-model:isOpen="isFilterPanelModalOpen"
+      v-model:selectedProperties="filter"
+      :disabled-properties="disabledProperties"
+      @close-modal="isFilterPanelModalOpen = false"
+    />
 
     <LoadDeckModal
       v-model:isOpen="isLoadDeckModalOpen"
       @close-modal="isLoadDeckModalOpen = false"
       @load-deck="handleLoadDeck"
     />
+
+    <SaveDeckModal
+      v-model:isOpen="isSaveDeckModalOpen"
+      :deck-hash="deckHash"
+      :format="filter.format"
+      :clan="selectedClan"
+      @close-modal="isSaveDeckModalOpen = false"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { AdjustmentsHorizontalIcon, ArrowDownOnSquareStackIcon, DocumentDuplicateIcon } from '@heroicons/vue/24/solid';
 import { storeToRefs } from 'pinia';
 import { useClipboard, watchDebounced } from '@vueuse/core';
+
+import { AdjustmentsHorizontalIcon, ArrowDownOnSquareStackIcon, DocumentDuplicateIcon } from '@heroicons/vue/24/solid';
 import ExternalLinkIcon from '@/components/Icons/ExternalLinkIcon.vue';
 import TrashBinIcon from '@/components/Icons/TrashBinIcon.vue';
 import PublishIcon from '@/components/Icons/PublishIcon.vue';
 import SaveIcon from '@/components/Icons/SaveIcon.vue';
-import CardGallery from '@/components/CardGallery/CardGallery.vue';
-import { useFetchCards } from '@/composables/useFetchCards';
-import type { Card, CardFilterProperty, CardInDeck, CardProperty } from '@/types/card';
-import CardImage from '@/components/CardGallery/CardImage.vue';
+import Spinner from '@/components/Icons/Spinner.vue';
+
 import FilterPanelModal from '@/components/FilterPanel/FilterPanelModal.vue';
+import SaveDeckModal from '@/components/DeckBuilder/SaveDeckModal.vue';
+import LoadDeckModal from '@/components/DeckBuilder/LoadDeckModal.vue';
+
 import { useUserStore } from '@/stores/user';
-import { clansData } from '@/config/card_properties';
+import { useFetchCards } from '@/composables/useFetchCards';
 import { useCardProperties } from '@/composables/useCardProperties';
 import { useCheckCardProperties } from '@/composables/useCheckCardProperties';
-import ContainerTemplate from '@/components/Template/ContainerTemplate.vue';
 import { useGenerateDeckHash } from '@/composables/useGenerateDeckHash';
-import { portalUrl } from '@/config/api';
-import LoadDeckModal from '@/components/DeckBuilder/LoadDeckModal.vue';
-import type { LoadDeckInfo } from '@/components/DeckBuilder/LoadDeckModal.vue';
-import Spinner from '@/components/Icons/Spinner.vue';
 import { usePublishDeckCode } from '@/composables/usePublishDeckCode';
+
+import ContainerTemplate from '@/components/Template/ContainerTemplate.vue';
+import CardGallery from '@/components/CardGallery/CardGallery.vue';
+import CardImage from '@/components/CardGallery/CardImage.vue';
+
+import type { DeckInfo } from '@/components/DeckBuilder/LoadDeckModal.vue';
+import type { Card, CardFilterProperty, CardInDeck, CardProperty } from '@/types/card';
+
+import { clansData } from '@/config/card_properties';
+import { portalUrl } from '@/config/api';
 
 const selectedClan = ref<CardProperty | null>(null);
 
@@ -316,15 +328,16 @@ const filter = ref<CardFilterProperty>({
 
 const userStore = useUserStore();
 const { language } = storeToRefs(userStore);
-const clans = clansData[language.value];
 const { isToken } = useCheckCardProperties();
 const { copy, copied, isSupported } = useClipboard({ legacy: true });
+const clans = clansData[language.value];
 
 const filteredCards = ref<Card[] | null>(null);
 const fetchError = ref<Error | null>(null);
 
 const isFilterPanelModalOpen = ref(false);
 const isLoadDeckModalOpen = ref(false);
+const isSaveDeckModalOpen = ref(false);
 
 const cardsContainerEle = ref<HTMLElement | null>(null);
 const builtDeck = ref<CardInDeck[]>([]);
@@ -343,16 +356,14 @@ const disabledProperties = computed(() => {
 const totalCardCountInDeck = computed(() => builtDeck.value.reduce((acc, c) => acc + c.count, 0));
 
 function isValidCard(card: CardInDeck) {
-  let formatTypeCondition = true;
-  let clanCondition = true;
+  let formatTypeCondition = false;
+  let clanCondition = false;
+  const selectedFormatId = filter.value.format?.id;
 
-  // If card format type is unlimited, check if the card is in the selected format
-  // unlimited format card can only be added if the selected format is unlimited
-  if (card.format_type === 0)
-    formatTypeCondition = card.format_type === filter.value.format?.id;
-  // If card format type is rotation, check if the selected format is rotation
-  else
-    formatTypeCondition = filter.value.format?.id === 1;
+  if (selectedFormatId === 0) // unlimited
+    formatTypeCondition = true;
+  else if (selectedFormatId === 1) // rotation
+    formatTypeCondition = card.format_type === selectedFormatId;
 
   // If a clan is selected, check if the card is in the selected clan or neutral
   if (selectedClan.value)
@@ -406,12 +417,12 @@ function openDeckUrl() {
   window.open(deckUrl.value, '_blank');
 }
 
-function handleLoadDeck(loadDeckInfo: LoadDeckInfo) {
-  isFetchingDeck.value = loadDeckInfo.isLoadingDeck;
-  builtDeck.value = loadDeckInfo.deckHashData?.deck ?? [];
-  const { parseDeckCodeError, parseDeckHashError } = loadDeckInfo.error;
+function handleLoadDeck(deckInfo: DeckInfo) {
+  isFetchingDeck.value = deckInfo.isLoadingDeck;
+  builtDeck.value = deckInfo.deckHashData?.deck ?? [];
+  const { parseDeckCodeError, parseDeckHashError } = deckInfo.error;
   loadDeckError.value = parseDeckCodeError ?? parseDeckHashError ?? null;
-  const clan = clans.find(clan => clan.id === loadDeckInfo.deckHashData?.clanId);
+  const clan = clans.find(clan => clan.id === deckInfo.deckHashData?.clanId);
   if (!clan)
     return;
 
