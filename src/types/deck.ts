@@ -5,4 +5,5 @@ export interface DeckInStorage {
   deckHash: string
   format?: CardProperty
   clan: CardProperty | null
+  count: number
 }
