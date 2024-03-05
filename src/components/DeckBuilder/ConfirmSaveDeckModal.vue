@@ -96,14 +96,8 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue';
-import { type PropType, computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useFocus, useStorage } from '@vueuse/core';
-import FilterPanelInput from '../FilterPanel/FilterPanelInput.vue';
-
 import { useUserStore } from '@/stores/user';
-import type { DeckInStorage } from '@/types/deck';
-import type { CardProperty } from '@/types/card';
 
 defineProps({
   isOpen: {

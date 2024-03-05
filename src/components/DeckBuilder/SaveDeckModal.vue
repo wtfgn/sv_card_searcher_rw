@@ -139,8 +139,10 @@ const deckNameInput = ref<HTMLInputElement | null>(null);
 const deckName = ref('');
 const { focused: deckNameInputFocus } = useFocus(deckNameInput);
 
+// Local storage for saved decks
 const deckStorage = useStorage<DeckInStorage[]>('savedDecks', []);
 
+// If the deck name is empty, the input will be focused and an error will be thrown
 function validateDeckName() {
   if (!deckName.value) {
     deckNameInputFocus.value = true;
@@ -190,6 +192,7 @@ function updateDeckInStorage() {
   };
 }
 
+// New deck will be saved if the deck name is unique
 function saveNewDeck() {
   try {
     validateDeckName();
@@ -205,6 +208,7 @@ function saveNewDeck() {
   }
 }
 
+// If the deck name is duplicated, the user will be prompted to confirm the save
 function saveExistingDeck() {
   try {
     validateDeckName();
