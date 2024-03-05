@@ -273,6 +273,7 @@
         deckHash,
         format: filter.format,
         clan: selectedClan,
+        count: totalCardCountInDeck,
       }"
 
       @close-modal="isSaveDeckModalOpen = false"

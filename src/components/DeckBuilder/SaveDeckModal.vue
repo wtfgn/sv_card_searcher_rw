@@ -115,6 +115,7 @@ export interface RequiredDeckDataForSave {
   deckHash: string
   format?: CardProperty
   clan: CardProperty | null
+  count: number
 }
 
 const props = defineProps({
@@ -155,13 +156,15 @@ function validateDeckUniqueness() {
 }
 
 function validateDeckData() {
-  const { deckHash, format, clan } = props.requiredDeckData;
+  const { deckHash, format, clan, count } = props.requiredDeckData;
   if (!deckHash)
     throw new Error('Deck hash is missing');
   if (!format)
     throw new Error('Deck format is missing');
   if (!clan)
     throw new Error('Deck clan is missing');
+  if (!count || count < 1)
+    throw new Error('Deck count is missing or invalid');
 }
 
 function addDeckToStorage() {
@@ -170,6 +173,7 @@ function addDeckToStorage() {
     deckHash: props.requiredDeckData.deckHash,
     format: props.requiredDeckData.format,
     clan: props.requiredDeckData.clan,
+    count: props.requiredDeckData.count,
   });
 }
 
@@ -182,6 +186,7 @@ function updateDeckInStorage() {
     deckHash: props.requiredDeckData.deckHash,
     format: props.requiredDeckData.format!,
     clan: props.requiredDeckData.clan!,
+    count: props.requiredDeckData.count,
   };
 }
 
