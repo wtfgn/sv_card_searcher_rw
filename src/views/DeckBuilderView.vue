@@ -269,9 +269,12 @@
 
     <SaveDeckModal
       v-model:isOpen="isSaveDeckModalOpen"
-      :deck-hash="deckHash"
-      :format="filter.format"
-      :clan="selectedClan"
+      :required-deck-data="{
+        deckHash,
+        format: filter.format,
+        clan: selectedClan,
+      }"
+
       @close-modal="isSaveDeckModalOpen = false"
     />
   </div>
