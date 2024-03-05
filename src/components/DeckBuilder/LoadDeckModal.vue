@@ -68,11 +68,11 @@
                       @click="loadDeck(deck.deckHash, 'hash')"
                     >
                       <div class="flex items-center justify-between p-2" :class="isDark ? 'hover:bg-sky-800 hover:text-sky-100' : 'hover:bg-sky-100 hover:text-sky-900'">
-                        <span> {{ deck.name }} - [{{ deck.clan.name }}] </span>
+                        <span> {{ deck.name }} - [{{ deck.clan?.name ?? 'Unknown Clan' }}] </span>
                         <button
                           class=""
                           :class="isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-600'"
-                          @click.stop="removeDeckFromStorage(deck.deckHash)"
+                          @click.stop="removeDeckFromStorage(deck.name)"
                         >
                           <TrashBinIcon class="w-5 h-5" />
                         </button>
@@ -184,8 +184,8 @@ const loadDeckInfo = computed(() => ({
   },
 }));
 
-function removeDeckFromStorage(deckHash: string) {
-  deckStorage.value = deckStorage.value.filter(deck => deck.deckHash !== deckHash);
+function removeDeckFromStorage(deckName: string) {
+  deckStorage.value = deckStorage.value.filter(deck => deck.name !== deckName);
 }
 
 function handleLoadDeckButtonClick() {
