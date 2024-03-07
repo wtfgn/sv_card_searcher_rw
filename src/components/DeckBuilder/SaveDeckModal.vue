@@ -63,6 +63,13 @@
                       type="text"
                       :required="true"
                     />
+
+                    <div
+                      v-if="errorMessage"
+                      class="text-red-500 text-sm mt-1"
+                    >
+                      {{ errorMessage }}
+                    </div>
                   </div>
                 </div>
 
@@ -100,11 +107,11 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue';
-import { ref, toValue } from 'vue';
-import type { PropType, Ref, computed } from 'vue';
+import { ref } from 'vue';
+import type { PropType } from 'vue';
 
 import { storeToRefs } from 'pinia';
-import { type RemovableRef, useFocus, useStorage } from '@vueuse/core';
+import { useFocus, useStorage } from '@vueuse/core';
 import FilterPanelInput from '../FilterPanel/FilterPanelInput.vue';
 import ConfirmSaveDeckModal from '@/components/DeckBuilder/ConfirmSaveDeckModal.vue';
 import { useUserStore } from '@/stores/user';
@@ -129,7 +136,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['closeModal', 'saveDeckError']);
+const emit = defineEmits(['closeModal', 'saveDeckError', 'saveDeckSuccess']);
 
 const userStore = useUserStore();
 const { isDark } = storeToRefs(userStore);
@@ -142,31 +149,39 @@ const { focused: deckNameInputFocus } = useFocus(deckNameInput);
 // Local storage for saved decks
 const deckStorage = useStorage<DeckInStorage[]>('savedDecks', []);
 
+const errorMessage = ref('');
+
 // If the deck name is empty, the input will be focused and an error will be thrown
 function validateDeckName() {
   if (!deckName.value) {
     deckNameInputFocus.value = true;
-    throw new Error('Deck name is missing');
+    errorMessage.value = 'Deck name is missing';
+    throw new Error(errorMessage.value);
   }
 }
 
 function validateDeckUniqueness() {
   if (deckStorage.value.some(deck => deck.name === deckName.value)) {
     isConfirmSaveDeckModalOpen.value = true;
-    throw new Error('Deck name is duplicated');
+    errorMessage.value = 'Deck name already exists';
+    throw new Error(errorMessage.value);
   }
 }
 
 function validateDeckData() {
   const { deckHash, format, clan, count } = props.requiredDeckData;
+  errorMessage.value = '';
+
   if (!deckHash)
-    throw new Error('Deck hash is missing');
+    errorMessage.value = 'Deck hash is missing';
   if (!format)
-    throw new Error('Deck format is missing');
+    errorMessage.value = 'Deck format is missing';
   if (!clan)
-    throw new Error('Deck clan is missing');
+    errorMessage.value = 'Deck clan is missing';
   if (!count || count < 1)
-    throw new Error('Deck count is missing or invalid');
+    errorMessage.value = 'The deck must contain at least one card';
+  if (errorMessage.value)
+    throw new Error(errorMessage.value);
 }
 
 function addDeckToStorage() {
@@ -182,7 +197,7 @@ function addDeckToStorage() {
 function updateDeckInStorage() {
   const deckIndex = deckStorage.value.findIndex(deck => deck.name === deckName.value);
   if (deckIndex === -1)
-    throw new Error('Deck not found in storage');
+    throw new Error('Deck not found');
   deckStorage.value[deckIndex] = {
     name: deckName.value,
     deckHash: props.requiredDeckData.deckHash,
@@ -202,6 +217,7 @@ function saveNewDeck() {
     addDeckToStorage();
 
     emit('closeModal');
+    emit('saveDeckSuccess', { title: 'Deck Saved', message: 'The deck has been successfully saved', type: 'success' });
   }
   catch (error) {
     emit('saveDeckError', error);
@@ -218,6 +234,7 @@ function saveExistingDeck() {
     isConfirmSaveDeckModalOpen.value = false;
 
     emit('closeModal');
+    emit('saveDeckSuccess', { title: 'Deck Overwritten', message: 'The deck has been successfully overwritten', type: 'success' });
   }
   catch (error) {
     emit('saveDeckError', error);
