@@ -1,4 +1,4 @@
-import type { Card, CardProperty } from './card';
+import type { CardProperty } from './card';
 
 export interface DeckInStorage {
   name: string
