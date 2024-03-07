@@ -275,8 +275,14 @@
         clan: selectedClan,
         count: totalCardCountInDeck,
       }"
-
       @close-modal="isSaveDeckModalOpen = false"
+      @save-deck-success="showNotification"
+    />
+
+    <NotificationModal
+      v-model:isOpen="isNotificationModalOpen"
+      :notifaction-data="notificationData"
+      @close-modal="isNotificationModalOpen = false"
     />
   </div>
 </template>
@@ -296,6 +302,7 @@ import Spinner from '@/components/Icons/Spinner.vue';
 import FilterPanelModal from '@/components/FilterPanel/FilterPanelModal.vue';
 import SaveDeckModal from '@/components/DeckBuilder/SaveDeckModal.vue';
 import LoadDeckModal from '@/components/DeckBuilder/LoadDeckModal.vue';
+import NotificationModal from '@/components/NotificationModal.vue';
 
 import { useUserStore } from '@/stores/user';
 import { useFetchCards } from '@/composables/useFetchCards';
@@ -310,6 +317,7 @@ import CardImage from '@/components/CardGallery/CardImage.vue';
 
 import type { DeckInfo } from '@/components/DeckBuilder/LoadDeckModal.vue';
 import type { Card, CardFilterProperty, CardInDeck, CardProperty } from '@/types/card';
+import type { NotificationData } from '@/components/NotificationModal.vue';
 
 import { clansData } from '@/config/card_properties';
 import { portalUrl } from '@/config/api';
@@ -343,6 +351,7 @@ const fetchError = ref<Error | null>(null);
 const isFilterPanelModalOpen = ref(false);
 const isLoadDeckModalOpen = ref(false);
 const isSaveDeckModalOpen = ref(false);
+const isNotificationModalOpen = ref(false);
 
 const cardsContainerEle = ref<HTMLElement | null>(null);
 const builtDeck = ref<CardInDeck[]>([]);
@@ -350,6 +359,12 @@ const { deckHash } = useGenerateDeckHash(builtDeck, selectedClan);
 const { deckCode, publishDeckCode, isPublishingDeckCode, publishDeckCodeError } = usePublishDeckCode(deckHash);
 const loadDeckError = ref<Error | null>(null);
 const isFetchingDeck = ref(false);
+
+const notificationData = ref<NotificationData>({
+  title: '',
+  message: '',
+  type: 'default',
+});
 
 const disabledProperties = computed(() => {
   const disabledProperties: CardFilterProperty = {};
@@ -434,6 +449,11 @@ function handleLoadDeck(deckInfo: DeckInfo) {
   // If the selected clan is different from the loaded deck's clan, change the selected clan
   if (selectedClan.value?.id !== clan.id)
     handleSelecteClan(clan);
+}
+
+function showNotification({ title, message, type }: NotificationData) {
+  notificationData.value = { title, message, type };
+  isNotificationModalOpen.value = true;
 }
 
 watch(() => totalCardCountInDeck.value, () => {
