@@ -7,9 +7,16 @@ export function useParseDeckCode() {
   const isParsingDeckCode = ref(false);
   const parseDeckCodeError = ref<Error | null>(null);
 
+  const clearParseDeckCodeState = () => {
+    parsedHash.value = null;
+    isParsingDeckCode.value = false;
+    parseDeckCodeError.value = null;
+  };
+
   const parseDeckCode = async (deckCode: ComposableParam<string>) => {
     try {
-      isParsingDeckCode.value = true;
+      clearParseDeckCodeState();
+
       const { data } = await axios.get(`https://svgdb.me/api/deckcode/${toValue(deckCode)}`);
       const { hash, errors } = data;
       if (errors.length > 0)
@@ -29,5 +36,6 @@ export function useParseDeckCode() {
     isParsingDeckCode,
     parseDeckCodeError,
     parseDeckCode,
+    clearParseDeckCodeState,
   };
 }
