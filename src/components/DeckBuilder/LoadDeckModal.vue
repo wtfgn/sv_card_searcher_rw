@@ -49,36 +49,51 @@
                 Load Deck
               </DialogTitle>
 
-              <div class="mt-4 grid grid-cols-2 gap-4">
+              <section class="mt-4 grid grid-cols-2 gap-4">
                 <div class="col-span-full">
                   <h3 class="text-lg mb-2 font-semibold">
                     Saved Deck
                   </h3>
 
-                  <ul
-                    class="w-full rounded text-base border transition-colors overflow-y-auto min-h-[200px] max-h-[200px]"
+                  <div
+                    class="relative w-full rounded text-base border transition-colors overflow-y-auto min-h-[200px] max-h-[200px]"
                     :class="isDark ? ' border-slate-700' : ' border-slate-200'"
                   >
-                    <li
-                      v-for="deck in deckStorage"
-                      :key="deck.deckHash"
-                      class="border-b transition-colors
-                      "
-                      :class="isDark ? ' border-slate-700' : ' border-slate-200'"
-                      @click="loadDeck(deck.deckHash, 'hash')"
+                    <ul
+                      v-if="deckStorage.length"
+                      class="w-full"
                     >
-                      <div class="flex items-center justify-between p-2" :class="isDark ? 'hover:bg-sky-800 hover:text-sky-100' : 'hover:bg-sky-100 hover:text-sky-900'">
-                        <span> {{ deck.name }} - [{{ deck.clan?.name ?? 'Unknown Clan' }}] </span>
-                        <button
-                          class=""
-                          :class="isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-600'"
-                          @click.stop="removeDeckFromStorage(deck.name)"
-                        >
-                          <TrashBinIcon class="w-5 h-5" />
-                        </button>
-                      </div>
-                    </li>
-                  </ul>
+                      <li
+                        v-for="deck in deckStorage"
+                        :key="deck.deckHash"
+                        class="border-b transition-colors
+                        "
+                        :class="isDark ? ' border-slate-700' : ' border-slate-200'"
+                        @click="loadDeck(deck.deckHash, 'hash')"
+                      >
+                        <div class="flex items-center justify-between p-2" :class="isDark ? 'hover:bg-sky-800 hover:text-sky-100' : 'hover:bg-sky-100 hover:text-sky-900'">
+                          <span class="flex-1 basis-30 truncate"> {{ deck.name }} </span>
+                          <span class="flex-1 text-center">[{{ deck.clan?.name ?? 'Unknown Clan' }}] - [{{ deck.count }}/40]</span>
+                          <button
+                            class=""
+                            :class="isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-600'"
+                            @click.stop="removeDeckFromStorage(deck.name)"
+                          >
+                            <TrashBinIcon class="w-5 h-5" />
+                          </button>
+                        </div>
+                      </li>
+                    </ul>
+                    <div
+                      v-else
+                      class="absolute inset-0 flex items-center justify-center text-base font-medium select-none"
+                      :class="isDark ? 'text-slate-500' : 'text-slate-400'"
+                    >
+                      <span>
+                        No saved decks...
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="col-span-full">
@@ -88,8 +103,9 @@
                   <FilterPanelInput
                     v-model="portalDeckUrl"
                     :disabled="!!deckCode"
-                    placeholder="Example: https://shadowverse-portal.com/deck/3.1.6lZu2.6lZu2.6lZu2..."
-                    class="w-full p-2 rounded text-base"
+                    placeholder="Example: https://shadowverse-portal.com/deck/1.4.5_394.5_394..."
+                    class="w-full p-2 rounded text-base placeholder:font-medium"
+                    :class="isDark ? 'placeholder:text-slate-500' : 'placeholder:text-slate-400'"
                     type="text"
                   />
                 </div>
@@ -102,23 +118,31 @@
                     v-model="deckCode"
                     :disabled="!!portalDeckUrl"
                     placeholder="Example: 6ax8"
-                    class="w-full p-2 rounded text-base "
+                    class="w-full p-2 rounded text-base placeholder:font-medium"
+                    :class="isDark ? 'placeholder:text-slate-500' : 'placeholder:text-slate-400'"
+                    :maxlength="4"
                     type="text"
                   />
                 </div>
-              </div>
 
-              <div class="mt-8">
-                <button
-                  class="w-full px-4 py-2 text-xl col-span-full
-                   rounded  transition-colors  font-semibold"
-                  :class="isDark ? 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                    : 'bg-slate-200  text-slate-800 hover:bg-slate-300'"
-                  @click="handleLoadDeckButtonClick"
-                >
-                  Load Deck
-                </button>
-              </div>
+                <div v-if="inputErrorMessage" class="col-span-full">
+                  <p class="text-sm text-red-500">
+                    {{ inputErrorMessage }}
+                  </p>
+                </div>
+
+                <div class="mt-8 col-span-full">
+                  <button
+                    class="w-full px-4 py-2 text-xl col-span-full
+                     rounded  transition-colors  font-semibold"
+                    :class="isDark ? 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                      : 'bg-slate-200  text-slate-800 hover:bg-slate-300'"
+                    @click.prevent="handleLoadDeckButtonClick"
+                  >
+                    Load Deck
+                  </button>
+                </div>
+              </section>
             </DialogPanel>
           </TransitionChild>
         </div>
@@ -135,7 +159,7 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue';
-import { computed, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useStorage } from '@vueuse/core';
 import FilterPanelInput from '../FilterPanel/FilterPanelInput.vue';
@@ -164,6 +188,7 @@ defineProps({
 
 const emit = defineEmits(['closeModal', 'loadDeck']);
 
+// Deck Source
 const portalDeckUrl = ref('');
 const deckCode = ref('');
 const deckStorage = useStorage<DeckInStorage[]>('savedDecks', [], localStorage, { mergeDefaults: true });
@@ -171,54 +196,89 @@ const deckStorage = useStorage<DeckInStorage[]>('savedDecks', [], localStorage, 
 const userStore = useUserStore();
 const { isDark } = storeToRefs(userStore);
 
-const isLoadingDeck = ref(false);
-const { parsedHash, parseDeckCodeError, parseDeckCode } = useParseDeckCode();
-const { parsedDeckHashData, parseDeckHashError, parseDeckHash } = useParseDeckHash();
+const { parsedHash, parseDeckCodeError, parseDeckCode, clearParseDeckCodeState } = useParseDeckCode();
+const { parsedDeckHashData, parseDeckHashError, parseDeckHash, clearParseDeckHashState } = useParseDeckHash();
 
-const loadDeckInfo = computed(() => ({
-  deckHashData: parsedDeckHashData.value,
-  isLoadingDeck: isLoadingDeck.value,
-  error: {
-    parseDeckCodeError: parseDeckCodeError.value,
-    parseDeckHashError: parseDeckHashError.value,
-  },
-}));
+const inputErrorMessage = ref('');
 
 function removeDeckFromStorage(deckName: string) {
   deckStorage.value = deckStorage.value.filter(deck => deck.name !== deckName);
 }
 
-function handleLoadDeckButtonClick() {
-  if (portalDeckUrl.value)
-    loadDeck(portalDeckUrl.value, 'portal');
-  else if (deckCode.value)
-    loadDeck(deckCode.value, 'code');
-
-  emit('closeModal');
+function validateInput() {
+  if (!portalDeckUrl.value && !deckCode.value)
+    throw new Error('Please enter a deck code or a portal deck URL');
+  else if (portalDeckUrl.value && deckCode.value)
+    throw new Error('Please enter only one deck source');
+  else if (deckCode.value && deckCode.value.length !== 4)
+    throw new Error('Deck code must be 4 characters long');
 }
 
-async function loadDeck(source: string, type: 'portal' | 'code' | 'hash') {
+function handleLoadDeckButtonClick() {
+  try {
+    inputErrorMessage.value = '';
+    validateInput();
+    portalDeckUrl.value
+      ? loadDeck(portalDeckUrl.value, 'url')
+      : loadDeck(deckCode.value, 'code');
+
+    emit('closeModal');
+  }
+  catch (error) {
+    inputErrorMessage.value = (error as Error).message;
+  }
+}
+
+function extractHashFromUrl(url: string) {
+  return url.substring(url.search(/\d\.\d\./g), url.search(/\?/g));
+}
+
+async function loadDeck(source: string, type: 'url' | 'code' | 'hash') {
   let portalDeckUrl = '';
   let deckCode = '';
+  let loadDeckInfo: DeckInfo = {
+    deckHashData: null,
+    isLoadingDeck: true,
+    error: {
+      parseDeckCodeError: null,
+      parseDeckHashError: null,
+    },
+  };
 
-  isLoadingDeck.value = true;
-  emit('loadDeck', loadDeckInfo.value);
+  // Pass the initial state of the loadDeckInfo
+  // So to display the loading spinner
+  clearParseDeckCodeState();
+  clearParseDeckHashState();
 
-  if (type === 'portal') {
-    portalDeckUrl = source;
-    const deckHash = portalDeckUrl.substring(portalDeckUrl.search(/\d\.\d\./g), portalDeckUrl.search(/\?/g));
-    await parseDeckHash(deckHash);
-  }
-  else if (type === 'code') {
-    deckCode = source;
-    await parseDeckCode(deckCode);
-    await parseDeckHash(parsedHash);
-  }
-  else if (type === 'hash') {
-    await parseDeckHash(source);
+  emit('loadDeck', loadDeckInfo);
+
+  switch (type) {
+    case 'url':
+      portalDeckUrl = source;
+      await parseDeckHash(extractHashFromUrl(portalDeckUrl));
+      break;
+    case 'code':
+      deckCode = source;
+      await parseDeckCode(deckCode);
+      // If the deck code is valid, parse the deck hash
+      if (!parseDeckCodeError.value)
+        await parseDeckHash(parsedHash);
+      break;
+    case 'hash':
+      await parseDeckHash(source);
+      break;
   }
 
-  isLoadingDeck.value = false;
-  emit('loadDeck', loadDeckInfo.value);
+  // Update the loadDeckInfo with the parsed deck data
+  loadDeckInfo = {
+    deckHashData: parsedDeckHashData.value,
+    isLoadingDeck: false,
+    error: {
+      parseDeckCodeError: parseDeckCodeError.value,
+      parseDeckHashError: parseDeckHashError.value,
+    },
+  };
+
+  emit('loadDeck', loadDeckInfo);
 }
 </script>
