@@ -2,7 +2,7 @@
 - Search any cards you want
 - Build & Save & Distrubute your decks
 
-Relies on the api https://github.com/wtfgn/shadowverse_api
+Relies on the api https://github.com/wtfgn/shadowverse_api.<br>
 If you have found any bugs or want to contirbute to this project, please feel free to submit a pull request. 
 
 ## Project Setup
