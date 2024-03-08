@@ -15,12 +15,19 @@ export function useParseDeckHash() {
   const isParsingDeckHash = ref(false);
   const parseDeckHashError = ref<Error | null>(null);
 
-  const parseDeckHash = async (deckHash: ComposableParam<string | null>) => {
-    if (!toValue(deckHash))
-      return;
+  const clearParseDeckHashState = () => {
+    parsedDeckHashData.value = null;
+    isParsingDeckHash.value = false;
+    parseDeckHashError.value = null;
+  };
 
+  const parseDeckHash = async (deckHash: ComposableParam<string | null>) => {
     try {
-      isParsingDeckHash.value = true;
+      clearParseDeckHashState();
+
+      if (!toValue(deckHash))
+        throw new Error('Invalid deck hash. Please check the hash and try again.');
+
       const response = await axios.get(`${baseUrl}/deckhash/${toValue(deckHash)}`);
       const data = response.data;
       parsedDeckHashData.value = {
@@ -42,5 +49,6 @@ export function useParseDeckHash() {
     isParsingDeckHash,
     parseDeckHashError,
     parseDeckHash,
+    clearParseDeckHashState,
   };
 }
