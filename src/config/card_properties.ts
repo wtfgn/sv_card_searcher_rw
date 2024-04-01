@@ -1,5 +1,6 @@
 export const cardSetsData = {
   'en': [
+    { id: 10032, name: 'Heroes of Shadowverse' },
     { id: 10031, name: 'Resurgent Legends' },
     { id: 10030, name: 'Order Shift' },
     { id: 10029, name: 'Heroes of Rivenbrandt' },
@@ -63,6 +64,7 @@ export const cardSetsData = {
   ],
 
   'zh-tw': [
+    { id: 10032, name: '闇影詩章：英雄群起' },
     { id: 10031, name: '傳說復甦' },
     { id: 10030, name: '變革的恆規' },
     { id: 10029, name: '密斯塔爾西亞的英雄' },
@@ -125,6 +127,7 @@ export const cardSetsData = {
     { id: 70030, name: 'SPY×FAMILY合作' },
   ],
   'ja': [
+    { id: 10032, name: 'ヒーローズ・オブ・シャドウバース' },
     { id: 10031, name: 'リサージェント・レジェンズ' },
     { id: 10030, name: 'オーダーシフト' },
     { id: 10029, name: 'ミスタルシアの英雄' },
